@@ -1,0 +1,62 @@
+[
+  {
+    "level": "A1",
+    "unit_no": 1,
+    "unit_name": "Merhaba",
+    "words": [
+      {
+        "tr": "Arkadaş",
+        "uz": "Do'st",
+        "example": "Ali benim en iyi arkadaşım."
+      }
+    ]
+  },
+  {
+    "level": "A2",
+    "unit_no": 1,
+    "unit_name": "Gezelim Görelim",
+    "words": [
+      {
+        "tr": "Bilet",
+        "uz": "Chipta",
+        "example": "Uçak bileti çok pahalı."
+      }
+    ]
+  },
+  {
+    "level": "B1",
+    "unit_no": 1,
+    "unit_name": "Haberiniz Olsun",
+    "words": [
+      {
+        "tr": "Gelişme",
+        "uz": "Rivojlanish / O'zgarish",
+        "example": "Son gelişmelerden haberim yok."
+      }
+    ]
+  },
+  {
+    "level": "B2",
+    "unit_no": 1,
+    "unit_name": "İnsanlar ve Hayatlar",
+    "words": [
+      {
+        "tr": "Yetenek",
+        "uz": "Qobiliyat",
+        "example": "Onun resim çizme yeteneği var."
+      }
+    ]
+  },
+  {
+    "level": "C1",
+    "unit_no": 1,
+    "unit_name": "Hak ve Adalet",
+    "words": [
+      {
+        "tr": "Özgürlük",
+        "uz": "Ozodlik / Erkinlik",
+        "example": "Hürriyet ve özgürlük aynı manadadır."
+      }
+    ]
+  }
+]
