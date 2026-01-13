@@ -4,9 +4,22 @@ import '../../data/models/word_model.dart';
 
 class DictionaryService {
   Future<List<UnitModel>> loadDictionary() async {
-    final String response = await rootBundle.loadString('assets/data/sample_dictionary.json');
-    final List<dynamic> data = json.decode(response);
+    List<UnitModel> allLoadedUnits = [];
+    List<String> levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
-    return data.map((json) => UnitModel.fromJson(json)).toList();
+    for (String level in levels) {
+      for (int i = 1; i <= 7; i++) {
+        try {
+          String path = 'assets/data/${level}_unit$i.txt';
+          String jsonString = await rootBundle.loadString(path);
+          Map<String, dynamic> jsonData = jsonDecode(jsonString);
+
+          allLoadedUnits.add(UnitModel.fromJson(jsonData));
+        } catch (e) {
+          print("Fayl yuklanmadi: ${level}_unit$i.txt");
+        }
+      }
+    }
+    return allLoadedUnits;
   }
 }

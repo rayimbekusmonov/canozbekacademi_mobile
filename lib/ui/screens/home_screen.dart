@@ -2,6 +2,7 @@ import 'package:canozbekacademi/ui/screens/units_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dictionary_provider.dart';
+import 'search_delegate.dart';
 
 class HomeScreen extends StatelessWidget {
   final List<String> levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
@@ -9,7 +10,30 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Dream Language Turkcha')),
+      appBar: AppBar(title: Text('Canozbek Academy'),
+          actions: [
+            IconButton(
+          icon: const Icon(Icons.cloud_upload),
+          onPressed: () async {
+            await context.read<DictionaryProvider>().syncAllDataToFirestore();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Barcha ma'lumotlar serverga yuklandi!")),
+        );
+      },
+    ),
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: WordSearchDelegate(
+                    allWords: Provider.of<DictionaryProvider>(context, listen: false).allWords,
+                  ),
+                );
+              },
+            ),
+    ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.builder(
@@ -21,7 +45,6 @@ class HomeScreen extends StatelessWidget {
           itemCount: levels.length,
           itemBuilder: (context, index) {
             return GestureDetector(
-              // HomeScreen.dart ichidagi GridView itemBuilder ichiga joylang:
               onTap: () {
                 final provider = Provider.of<DictionaryProvider>(context, listen: false);
                 final filteredUnits = provider.getUnitsByLevel(levels[index]);
