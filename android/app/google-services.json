@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "405086673810",
+    "project_id": "canozbekacademy",
+    "storage_bucket": "canozbekacademy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405086673810:android:1dae27a07c5c8e5f5e7f4b",
+        "android_client_info": {
+          "package_name": "com.rayimbek.canozbekacademi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFN5dajOAeAdjK-iDOd_ZCffFDhil0tXU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

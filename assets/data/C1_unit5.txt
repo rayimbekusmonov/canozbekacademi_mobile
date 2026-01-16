@@ -1,0 +1,22 @@
+{
+  "level": "C1",
+  "unit_name": "Sinema ve Medya Terimleri",
+  "words": [
+    { "tr": "altyazı", "uz": "subtitr", "example": "Yabancı filmleri orijinal dilinde altyazı ile izlemeyi tercih ederim." },
+    { "tr": "başyapıt", "uz": "bosh asar, durdona", "example": "Bu film, yönetmenin sinema tarihindeki en büyük başyapıtı olarak kabul ediliyor." },
+    { "tr": "çekim", "uz": "kadr, suratga olish", "example": "Hava muhalefeti nedeniyle dış çekimler yarına ertelendi." },
+    { "tr": "dublaj", "uz": "dublyaj, ovozlashtirish", "example": "Animasyon filmlerinde dublaj kalitesi izleyici kitlesi için çok önemlidir." },
+    { "tr": "efekt", "uz": "effekt", "example": "Bilim kurgu filmlerinde kullanılan özel efektler izleyiciyi büyüledi." },
+    { "tr": "görüntü", "uz": "ko‘rinish, tasvir", "example": "Televizyonun görüntü kalitesi eskiye oranla çok daha net." },
+    { "tr": "gösterim", "uz": "namoyish", "example": "Film, bu akşam sinemalarda ilk gösterimine girecek." },
+    { "tr": "montaj", "uz": "montaj", "example": "Çekimler bittikten sonra filmin montaj aşaması üç ay sürdü." },
+    { "tr": "özgü", "uz": "o‘ziga xos, maxsus", "example": "Bu müzik tarzı sadece Karadeniz bölgesine özgü bir yapıdır." },
+    { "tr": "perde", "uz": "parda, ekran", "example": "Dev perdede yansıyan görüntüler herkesi heyecanlandırdı." },
+    { "tr": "sahne", "uz": "sahna", "example": "Filmin final sahnesinde gözyaşlarımı tutamadım." },
+    { "tr": "set", "uz": "set (suratga olish maydoni)", "example": "Oyuncular çekim için sabahın erken saatlerinde set ekibiyle buluştu." },
+    { "tr": "sınıflandırma", "uz": "tasniflash, toifalash", "example": "Filmler içeriklerine göre yaş gruplarına ayrılan bir sınıflandırmaya tabi tutulur." },
+    { "tr": "subliminal", "uz": "ong osti (subliminal)", "example": "Reklamlarda gizli subliminal mesajlar kullanıldığına dair tartışmalar var." },
+    { "tr": "uzun metraj", "uz": "uzun metrajli", "example": "Yönetmen, ilk uzun metrajlı filmiyle ödül kazanmayı başardı." },
+    { "tr": "yüzey", "uz": "yuz sath, ust", "example": "Ay'ın yüzeyi, binlerce kraterle dolu engebeli bir yapıya sahiptir." }
+  ]
+}
