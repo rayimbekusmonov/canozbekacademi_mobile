@@ -1,5 +1,6 @@
 {
   "level": "C1",
+  "unit_no": 4,
   "unit_name": "Ekonomi, Finans ve Yaşam Standartları",
   "words": [
     { "tr": "arazi", "uz": "yer, maydon", "example": "Yatırım yapmak amacıyla şehrin dışından geniş bir arazi satın aldı." },

@@ -1,5 +1,6 @@
 {
   "level": "C1",
+  "unit_no": 6,
   "unit_name": "Deyimler ve Kalıplaşmış İfadeler",
   "words": [
     { "tr": "Zaman öldürmek", "uz": "vaqtni bekorchi narsalarga sarflash", "example": "Durakta otobüs beklerken gazete okuyarak zaman öldürüyorum." },

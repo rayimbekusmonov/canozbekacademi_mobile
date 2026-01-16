@@ -1,6 +1,8 @@
 {
-  "category": "Sosyal Etkileşim ve Kalıplar",
-  "expressions": [
+   "level": "B2",
+   "unit_no": 7,
+   "unit_name": "Sosyal Etkileşim ve Kalıplar",
+   "words": [
     { "tr": "Kapıda kaldınız. Buyurun lütfen!", "uz": "Eshikda qoldingiz. Marhamat kiring!", "example": "Hava çok soğuk, kapıda kaldınız. Buyurun lütfen içeri girin!" },
     { "tr": "Hoş geldiniz, sefalar getirdiniz!", "uz": "Xush keldingiz, safolar keltirdingiz!", "example": "Efendim hoş geldiniz, sefalar getirdiniz evimize!" },
     { "tr": "Size görmek ne büyük şeref!", "uz": "Sizni ko‘rish na qadar sharaf!", "example": "Yıllar sonra sizi görmek ne büyük şeref!" },

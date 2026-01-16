@@ -40,7 +40,6 @@ class WordSearchDelegate extends SearchDelegate {
           title: Text(word.tr, style: TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Text(word.uz),
           onTap: () {
-            // Tanlanganda WordCard dialogini yoki sahifasini ochish mumkin
           },
         );
       },

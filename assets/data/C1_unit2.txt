@@ -1,5 +1,6 @@
 {
   "level": "C1",
+  "unit_no": 2,
   "unit_name": "Duygular, Hormonlar ve İnsan Psikolojisi",
   "words": [
     { "tr": "acıma", "uz": "achinish", "example": "Ona acıma duygusuyla değil, adalet duygusuyla yaklaşmalısın." },

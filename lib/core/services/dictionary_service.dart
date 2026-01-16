@@ -16,7 +16,7 @@ class DictionaryService {
 
           allLoadedUnits.add(UnitModel.fromJson(jsonData));
         } catch (e) {
-          print("Fayl yuklanmadi: ${level}_unit$i.txt");
+          continue;
         }
       }
     }

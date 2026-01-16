@@ -1,5 +1,6 @@
 {
   "level": "B2",
+  "unit_no": 4,
   "unit_name": "Hukuk, Adalet ve Toplum",
   "words": [
     { "tr": "bürokrasi", "uz": "rasmiyatchilik, qog'ozbozlik", "example": "Devlet dairelerindeki bürokrasi yüzünden işlemlerimiz çok yavaş ilerliyor." },

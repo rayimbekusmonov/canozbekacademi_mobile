@@ -1,5 +1,6 @@
 {
   "level": "C1",
+  "unit_no": 6,
   "unit_name": "Tıp, Nörobiyoloji ve Doğa Bilimleri",
   "words": [
     { "tr": "akson", "uz": "akson (nerv impulslarini o'tkazuvchi qism)", "example": "Aksonlar, sinir hücreleri arasındaki iletişimi sağlayan uzun uzantılardır." },
