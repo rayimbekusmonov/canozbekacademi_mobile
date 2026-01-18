@@ -2,6 +2,7 @@ import 'package:canozbekacademi/ui/screens/units_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dictionary_provider.dart';
+import 'favorites_screen.dart';
 import 'search_delegate.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -29,6 +30,15 @@ class HomeScreen extends StatelessWidget {
                   delegate: WordSearchDelegate(
                     allWords: Provider.of<DictionaryProvider>(context, listen: false).allWords,
                   ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.favorite, color: Colors.redAccent),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FavoritesScreen())
                 );
               },
             ),

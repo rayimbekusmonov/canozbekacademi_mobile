@@ -1,5 +1,6 @@
 {
   "level": "A2",
+
   "category": "Kalıp İfadeler ve Deyimler",
   "words": [
     { "tr": "Acıktım", "uz": "qornim ochdi", "example": "Anne, çok acıktım, yemekte ne var?" },

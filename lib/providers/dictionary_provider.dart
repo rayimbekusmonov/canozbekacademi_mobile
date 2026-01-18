@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/models/word_model.dart';
 import '../core/services/dictionary_service.dart';
 import 'dart:convert';
@@ -14,14 +15,33 @@ class DictionaryProvider with ChangeNotifier {
   List<UnitModel> get allUnits => _allUnits;
   bool get isLoading => _isLoading;
 
+  late List<String> _favoriteWordTrs = [];
+  List<String> get favoriteWordTrs => _favoriteWordTrs;
+
   Future<void> init() async {
     _isLoading = true;
     notifyListeners();
 
     _allUnits = await _service.loadDictionary();
 
+    await loadFavorites();
+
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    _favoriteWordTrs = prefs.getStringList('favorites_list') ?? [];
+    notifyListeners();
+  }
+
+  bool isFavorite(String trWord) {
+    return _favoriteWordTrs.contains(trWord);
+  }
+
+  List<WordModel> get favoriteWords {
+    return allWords.where((word) => _favoriteWordTrs.contains(word.tr)).toList();
   }
 
   List<UnitModel> getUnitsByLevel(String level) {
@@ -114,5 +134,19 @@ class DictionaryProvider with ChangeNotifier {
       words.addAll(unit.words);
     }
     return words;
+  }
+
+  final List<String> _favoriteWords = []; // So'zlarning 'tr' variantini saqlaymiz
+
+  Future<void> toggleFavorite(String wordTr) async {
+    if (_favoriteWords.contains(wordTr)) {
+      _favoriteWords.remove(wordTr);
+    } else {
+      _favoriteWords.add(wordTr);
+    }
+    // Lokal xotiraga saqlash
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favorites', _favoriteWords);
+    notifyListeners();
   }
 }

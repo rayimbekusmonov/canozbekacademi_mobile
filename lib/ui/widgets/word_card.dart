@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart'; // Providerni qo'shdik
 import '../../data/models/word_model.dart';
+import '../../providers/dictionary_provider.dart'; // Provider yo'lini tekshiring
 
 class WordCard extends StatefulWidget {
   final WordModel word;
@@ -15,14 +17,18 @@ class _WordCardState extends State<WordCard> {
   final FlutterTts flutterTts = FlutterTts();
 
   Future<void> _speak(String text) async {
-    await flutterTts.setLanguage("tr-TR"); // Turk tili kodi
-    await flutterTts.setPitch(1.0);        // Ovoz balandligi (ton)
-    await flutterTts.setSpeechRate(0.5);   // Tezligi (talabalar uchun sekinroq yaxshi)
+    await flutterTts.setLanguage("tr-TR");
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setSpeechRate(0.5);
     await flutterTts.speak(text);
   }
 
   @override
   Widget build(BuildContext context) {
+    // DictionaryProvider ga ulanamiz
+    final provider = Provider.of<DictionaryProvider>(context);
+    final bool isFav = provider.isFavorite(widget.word.tr);
+
     return Container(
       height: 220,
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -33,7 +39,9 @@ class _WordCardState extends State<WordCard> {
           subtitle: "Turkcha",
           color: Colors.blue.shade700,
           textColor: Colors.white,
-          isFront: true, // Old tomoni ekanini bildiramiz
+          isFront: true,
+          isFav: isFav,
+          onFavTap: () => provider.toggleFavorite(widget.word.tr),
         ),
         back: _buildCard(
           title: widget.word.uz,
@@ -42,6 +50,8 @@ class _WordCardState extends State<WordCard> {
           textColor: Colors.blue.shade900,
           example: widget.word.example,
           isFront: false,
+          isFav: isFav,
+          onFavTap: () => provider.toggleFavorite(widget.word.tr),
         ),
       ),
     );
@@ -54,8 +64,10 @@ class _WordCardState extends State<WordCard> {
     required Color textColor,
     String? example,
     required bool isFront,
+    required bool isFav,
+    required VoidCallback onFavTap,
   }) {
-    return Stack( // Burchakka tugma qo'yish uchun Stack ishlatamiz
+    return Stack(
       children: [
         Container(
           width: double.infinity,
@@ -92,7 +104,8 @@ class _WordCardState extends State<WordCard> {
             ],
           ),
         ),
-        // Faqat old tomonda (turkcha so'zda) audio tugmasini ko'rsatamiz
+
+        // Audio tugmasi (Faqat old tomonda)
         if (isFront)
           Positioned(
             top: 10,
@@ -101,10 +114,25 @@ class _WordCardState extends State<WordCard> {
               backgroundColor: Colors.white.withOpacity(0.2),
               child: IconButton(
                 icon: const Icon(Icons.volume_up, color: Colors.white),
-                onPressed: () => _speak(title), // So'zni talaffuz qiladi
+                onPressed: () => _speak(title),
               ),
             ),
           ),
+
+        Positioned(
+          top: 10,
+          left: 10,
+          child: CircleAvatar(
+            backgroundColor: isFront ? Colors.white.withOpacity(0.2) : Colors.blue.withOpacity(0.1),
+            child: IconButton(
+              icon: Icon(
+                isFav ? Icons.favorite : Icons.favorite_border,
+                color: isFav ? Colors.red : (isFront ? Colors.white : Colors.blue),
+              ),
+              onPressed: onFavTap,
+            ),
+          ),
+        ),
       ],
     );
   }
