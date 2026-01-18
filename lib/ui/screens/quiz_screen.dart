@@ -1,74 +1,188 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/word_model.dart';
-import '../../data/models/quiz_model.dart';
-import 'dart:math';
+import '../../providers/dictionary_provider.dart';
 
 class QuizScreen extends StatefulWidget {
-  final UnitModel unit;
-  const QuizScreen({super.key, required this.unit});
+  final List<WordModel> unitWords;
+  const QuizScreen({super.key, required this.unitWords});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  int _currentIndex = 0;
-  int _score = 0;
-  late List<Question> _questions;
+  late List<Map<String, dynamic>> questions;
+  int currentIndex = 0;
+  int score = 0;
+  String? selectedOption;
+  bool isAnswered = false;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _generateQuestions();
+    _pageController = PageController();
+    // DictionaryProvider orqali savollarni generatsiya qilish
+    questions = Provider.of<DictionaryProvider>(context, listen: false)
+        .generateQuiz(widget.unitWords);
   }
 
-  void _generateQuestions() {
-    _questions = widget.unit.words.map((word) {
-      // To'g'ri javob
-      String correct = word.uz;
-
-      // Noto'g'ri variantlarni tanlash
-      List<String> others = widget.unit.words
-          .where((w) => w.uz != correct)
-          .map((w) => w.uz)
-          .toList();
-      others.shuffle();
-
-      // 3 ta noto'g'ri + 1 ta to'g'ri javobni aralashtirish
-      List<String> options = others.take(3).toList();
-      options.add(correct);
-      options.shuffle();
-
-      return Question(
-        questionText: word.tr,
-        correctAnswer: correct,
-        options: options,
-      );
-    }).toList();
-    _questions.shuffle(); // Savollar ketma-ketligini aralashtirish
+  @override
+  void dispose() {
+    _pageController.dispose(); // Xotirani tozalash
+    super.dispose();
   }
 
-  void _checkAnswer(String selected) {
-    if (selected == _questions[_currentIndex].correctAnswer) {
-      _score++;
+  void handleAnswer(String option) {
+    if (isAnswered) return;
+
+    setState(() {
+      selectedOption = option;
+      isAnswered = true;
+      if (option == questions[currentIndex]['correct']) {
+        score++;
+      }
+    });
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      // Sahifa hali ochiqligini tekshirish (Crash oldini olish)
+      if (!mounted) return;
+
+      if (currentIndex < questions.length - 1) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+        setState(() {
+          currentIndex++;
+          selectedOption = null;
+          isAnswered = false;
+        });
+      } else {
+        _showResultDialog();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var currentQuestion = questions[currentIndex];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Test: ${currentIndex + 1}/${questions.length}"),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(6),
+          child: LinearProgressIndicator(
+            value: (currentIndex + 1) / questions.length,
+            backgroundColor: Colors.blue.shade100,
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
+          ),
+        ),
+      ),
+      body: PageView.builder(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: questions.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(30),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Text(
+                    currentQuestion['question'],
+                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                ...List.generate(currentQuestion['options'].length, (i) {
+                  String option = currentQuestion['options'][i];
+                  return _buildOptionButton(option, currentQuestion['correct']);
+                }),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildOptionButton(String option, String correct) {
+    Color cardColor = Colors.white;
+    Color textColor = Colors.black87;
+    IconData? icon;
+
+    if (isAnswered) {
+      if (option == correct) {
+        cardColor = Colors.green.shade400;
+        textColor = Colors.white;
+        icon = Icons.check_circle;
+      } else if (option == selectedOption) {
+        cardColor = Colors.red.shade400;
+        textColor = Colors.white;
+        icon = Icons.cancel;
+      }
     }
 
-    if (_currentIndex < _questions.length - 1) {
-      setState(() {
-        _currentIndex++;
-      });
-    } else {
-      _showResult();
-    }
+    return GestureDetector(
+      onTap: () => handleAnswer(option),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: isAnswered && option == correct ? Colors.green : Colors.grey.shade300,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                option,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textColor),
+              ),
+            ),
+            if (icon != null) Icon(icon, color: Colors.white),
+          ],
+        ),
+      ),
+    );
   }
 
-  void _showResult() {
+  void _showResultDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text("Natija"),
-        content: Text("Siz ${widget.unit.words.length} tadan $_score ta to'g'ri topdingiz."),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Test Yakunlandi!", textAlign: TextAlign.center),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.emoji_events, size: 80, color: Colors.orange),
+            const SizedBox(height: 20),
+            Text(
+              "Siz ${questions.length} tadan $score ta to'g'ri topdingiz!",
+              style: const TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -76,45 +190,8 @@ class _QuizScreenState extends State<QuizScreen> {
               Navigator.pop(context);
             },
             child: const Text("Tugallash"),
-          )
+          ),
         ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final question = _questions[_currentIndex];
-    return Scaffold(
-      appBar: AppBar(title: Text("${widget.unit.unitName} Testi")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            LinearProgressIndicator(value: (_currentIndex + 1) / _questions.length),
-            const SizedBox(height: 50),
-            Text("Bu so'zning tarjimasi nima?", style: TextStyle(color: Colors.grey)),
-            const SizedBox(height: 10),
-            Text(question.questionText, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
-            ...question.options.map((option) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade50,
-                      foregroundColor: Colors.blue.shade900,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                  ),
-                  onPressed: () => _checkAnswer(option),
-                  child: Text(option, style: const TextStyle(fontSize: 18)),
-                ),
-              ),
-            )),
-          ],
-        ),
       ),
     );
   }

@@ -8,15 +8,35 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = context.watch<DictionaryProvider>().favoriteWords;
+    // Provider-dan faqat favorit so'zlarni olamiz
+    final favoriteWords = context.watch<DictionaryProvider>().favoriteWords;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Mening lug'atim")),
-      body: favorites.isEmpty
-          ? Center(child: Text("Hali so'zlar qo'shilmagan"))
+      appBar: AppBar(
+        title: const Text("Mening lug'atim"),
+        centerTitle: true,
+      ),
+      body: favoriteWords.isEmpty
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.favorite_border, size: 80, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              "Hali so'zlar qo'shilmagan",
+              style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      )
           : ListView.builder(
-        itemCount: favorites.length,
-        itemBuilder: (context, index) => WordCard(word: favorites[index]),
+        itemCount: favoriteWords.length,
+        padding: const EdgeInsets.only(bottom: 20),
+        itemBuilder: (context, index) {
+          final word = favoriteWords[index];
+          return WordCard(word: word);
+        },
       ),
     );
   }
