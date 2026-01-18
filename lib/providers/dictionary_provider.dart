@@ -11,6 +11,28 @@ class DictionaryProvider with ChangeNotifier {
   final DictionaryService _service = DictionaryService();
   final FlutterTts _flutterTts = FlutterTts(); // TTS obyekti shu yerda bir marta yaratiladi
 
+  Map<String, int> _unitScores = {}; // Ballarni saqlash uchun
+  Map<String, int> get unitScores => _unitScores;
+
+  Future<void> saveScore(String unitKey, int score) async {
+    if (score > (_unitScores[unitKey] ?? 0)) {
+      _unitScores[unitKey] = score;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('unit_scores', json.encode(_unitScores));
+      notifyListeners();
+    }
+  }
+
+// init() ichida yuklab olishni ham unutmang:
+  Future<void> loadScores() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? scoresJson = prefs.getString('unit_scores');
+    if (scoresJson != null) {
+      _unitScores = Map<String, int>.from(json.decode(scoresJson));
+      notifyListeners();
+    }
+  }
+
   List<UnitModel> _allUnits = [];
   bool _isLoading = false;
   List<String> _favoriteWordTrs = []; // Yagona va asosiy ro'yxat
@@ -25,6 +47,7 @@ class DictionaryProvider with ChangeNotifier {
 
     _allUnits = await _service.loadDictionary();
     await loadFavorites(); // Favoritlarni yuklash
+    await loadScores();
 
     // TTS sozlamalari
     await _flutterTts.setLanguage("tr-TR");

@@ -4,8 +4,9 @@ import '../../data/models/word_model.dart';
 import '../../providers/dictionary_provider.dart';
 
 class QuizScreen extends StatefulWidget {
-  final List<WordModel> unitWords;
-  const QuizScreen({super.key, required this.unitWords});
+  // List<WordModel> o'rniga butun UnitModel-ni qabul qilamiz
+  final UnitModel unit;
+  const QuizScreen({super.key, required this.unit});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -23,14 +24,14 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
-    // DictionaryProvider orqali savollarni generatsiya qilish
+    // Unit ichidagi so'zlarni Provider-ga yuboramiz
     questions = Provider.of<DictionaryProvider>(context, listen: false)
-        .generateQuiz(widget.unitWords);
+        .generateQuiz(widget.unit.words);
   }
 
   @override
   void dispose() {
-    _pageController.dispose(); // Xotirani tozalash
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -46,7 +47,6 @@ class _QuizScreenState extends State<QuizScreen> {
     });
 
     Future.delayed(const Duration(milliseconds: 1500), () {
-      // Sahifa hali ochiqligini tekshirish (Crash oldini olish)
       if (!mounted) return;
 
       if (currentIndex < questions.length - 1) {
@@ -165,6 +165,13 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _showResultDialog() {
+    int percent = ((score / questions.length) * 100).toInt();
+
+    // UnitModel-dan level va unitNo ma'lumotlarini to'g'ridan-to'g'ri olamiz
+    String unitKey = "${widget.unit.level}_unit${widget.unit.unitNo}";
+
+    context.read<DictionaryProvider>().saveScore(unitKey, percent);
+
     showDialog(
       context: context,
       barrierDismissible: false,

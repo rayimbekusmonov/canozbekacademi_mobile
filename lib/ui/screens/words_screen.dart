@@ -89,7 +89,7 @@ class WordsScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => QuizScreen(unitWords: unit.words),
+              builder: (context) => QuizScreen(unit: unit),
             ),
           );
         },
