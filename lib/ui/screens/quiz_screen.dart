@@ -41,8 +41,16 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() {
       selectedOption = option;
       isAnswered = true;
-      if (option == questions[currentIndex]['correct']) {
+      String correctAnswer = questions[currentIndex]['correct'];
+      String questionWord = questions[currentIndex]['question']; // Turkcha so'z
+
+      if (option == correctAnswer) {
         score++;
+        // Agar avval xato qilgan bo'lsa va endi to'g'ri topsa, ro'yxatdan o'chirish mumkin (ixtiyoriy)
+        // context.read<DictionaryProvider>().removeFailedWord(questionWord);
+      } else {
+        // Xato qilingan so'zni Providerga yuboramiz
+        context.read<DictionaryProvider>().addFailedWord(questionWord);
       }
     });
 

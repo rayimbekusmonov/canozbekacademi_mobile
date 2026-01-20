@@ -11,12 +11,10 @@ class WordsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Orqa fonni biroz yumshoqroq qilamiz
       backgroundColor: Colors.grey.shade100,
 
       body: CustomScrollView(
         slivers: [
-          // Chiroyli kengayuvchi AppBar
           SliverAppBar(
             expandedHeight: 120.0,
             floating: false,
@@ -42,7 +40,6 @@ class WordsScreen extends StatelessWidget {
             ),
           ),
 
-          // Yo'riqnoma qismi
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
