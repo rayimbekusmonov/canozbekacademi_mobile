@@ -174,39 +174,55 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showResultDialog() {
     int percent = ((score / questions.length) * 100).toInt();
-
-    // UnitModel-dan level va unitNo ma'lumotlarini to'g'ridan-to'g'ri olamiz
     String unitKey = "${widget.unit.level}_unit${widget.unit.unitNo}";
-
     context.read<DictionaryProvider>().saveScore(unitKey, percent);
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Test Yakunlandi!", textAlign: TextAlign.center),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.emoji_events, size: 80, color: Colors.orange),
-            const SizedBox(height: 20),
-            Text(
-              "Siz ${questions.length} tadan $score ta to'g'ri topdingiz!",
-              style: const TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text("Tugallash"),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Natijaga qarab ikonka o'zgaradi
+              Icon(
+                percent >= 70 ? Icons.stars_rounded : Icons.sentiment_dissatisfied_rounded,
+                size: 80,
+                color: percent >= 70 ? Colors.orange : Colors.blueGrey,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                percent >= 70 ? "Ajoyib natija!" : "Yana bir bor urinib ko'ring!",
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Siz ${questions.length} tadan $score ta to'g'ri topdingiz ($percent%)",
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context); // Dialogni yopish
+                    Navigator.pop(context); // WordsScreen-ga qaytish
+                  },
+                  child: const Text("Tugallash", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
