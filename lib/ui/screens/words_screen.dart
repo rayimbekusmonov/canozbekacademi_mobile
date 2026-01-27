@@ -1,4 +1,5 @@
 import 'package:canozbekacademi/ui/screens/quiz_screen.dart';
+import 'package:canozbekacademi/ui/screens/flashcards_screen.dart'; // Importni unutgan bo'lsangiz
 import 'package:flutter/material.dart';
 import '../../data/models/word_model.dart';
 import '../widgets/word_card.dart';
@@ -12,7 +13,6 @@ class WordsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -20,6 +20,23 @@ class WordsScreen extends StatelessWidget {
             floating: false,
             pinned: true,
             elevation: 0,
+            actions: [
+              IconButton(
+                tooltip: "Flashcards rejimi",
+                icon: const Icon(Icons.style_outlined, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FlashcardsScreen(
+                        words: unit.words,
+                        title: unit.unitName,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 "${unit.level} - ${unit.unitName}",
@@ -65,9 +82,8 @@ class WordsScreen extends StatelessWidget {
             ),
           ),
 
-          // So'zlar ro'yxati
           SliverPadding(
-            padding: const EdgeInsets.only(bottom: 80), // FAB tugmasi so'zni to'sib qo'ymasligi uchun
+            padding: const EdgeInsets.only(bottom: 100), // FAB-ga joy tashlaymiz
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -80,7 +96,6 @@ class WordsScreen extends StatelessWidget {
         ],
       ),
 
-      // Quiz tugmasini pastga, ko'rinarli joyga o'tkazamiz
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(

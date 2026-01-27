@@ -16,26 +16,49 @@ class FavoritesScreen extends StatelessWidget {
         title: const Text("Mening lug'atim"),
         centerTitle: true,
       ),
-      body: favoriteWords.isEmpty
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.favorite_border, size: 80, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            Text(
-              "Hali so'zlar qo'shilmagan",
-              style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
-            ),
-          ],
-        ),
-      )
-          : ListView.builder(
-        itemCount: favoriteWords.length,
-        padding: const EdgeInsets.only(bottom: 20),
-        itemBuilder: (context, index) {
-          final word = favoriteWords[index];
-          return WordCard(word: word);
+      // lib/ui/screens/favorites_screen.dart ichidagi body qismi:
+
+      body: Consumer<DictionaryProvider>(
+        builder: (context, provider, child) {
+          final favorites = provider.favoriteWords;
+
+          if (favorites.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_border_rounded,
+                    size: 100,
+                    color: Colors.grey.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "Sevimli so'zlar hali yo'q",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "So'zlarni favoritga qo'shish uchun\nyurakcha tugmasini bosing",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: favorites.length,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            itemBuilder: (context, index) {
+              return WordCard(word: favorites[index]);
+            },
+          );
         },
       ),
     );

@@ -173,6 +173,8 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showResultDialog() {
     int percent = ((score / questions.length) * 100).toInt();
+    Color resultColor = percent >= 80 ? Colors.green : (percent >= 50 ? Colors.orange : Colors.red);
+    String message = percent == 100 ? "MUKAMMAL! 🏆" : (percent >= 80 ? "AJOYIB! 🌟" : "Yaxshi, yana harakat qiling");
     String unitKey = "${widget.unit.level}_unit${widget.unit.unitNo}";
     context.read<DictionaryProvider>().saveScore(unitKey, percent);
 

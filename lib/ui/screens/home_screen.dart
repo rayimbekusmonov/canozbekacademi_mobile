@@ -245,83 +245,101 @@ class HomeScreen extends StatelessWidget {
                   ),
                   itemCount: levels.length,
                   itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        final provider = Provider.of<DictionaryProvider>(context, listen: false);
-                        final filteredUnits = provider.getUnitsByLevel(levels[index]);
+                    final String currentLevel = levels[index];
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => UnitsScreen(
-                              units: filteredUnits,
-                              level: levels[index],
+                    return Consumer<DictionaryProvider>(
+                      builder: (context, provider, child) {
+                        // Har bir daraja uchun progressni hisoblaymiz (0.0 dan 1.0 gacha)
+                        final double progress = provider.getLevelProgress(currentLevel);
+
+                        return GestureDetector(
+                          onTap: () {
+                            final filteredUnits = provider.getUnitsByLevel(currentLevel);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UnitsScreen(
+                                  units: filteredUnits,
+                                  level: currentLevel,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Hero(
+                            tag: currentLevel,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25),
+                                gradient: LinearGradient(
+                                  colors: levelColors[index],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: levelColors[index][1].withValues(alpha: 0.4),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    right: -20,
+                                    top: -20,
+                                    child: CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          currentLevel,
+                                          style: const TextStyle(
+                                            fontSize: 38,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const Text(
+                                          "Daraja",
+                                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                                        ),
+                                        const SizedBox(height: 15),
+
+                                        // PROGRESS LINE
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(10),
+                                          child: LinearProgressIndicator(
+                                            value: progress,
+                                            minHeight: 6,
+                                            backgroundColor: Colors.white.withValues(alpha: 0.2),
+                                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "${(progress * 100).toInt()}%",
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );
                       },
-                      child: Hero(
-                        tag: levels[index],
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            gradient: LinearGradient(
-                              colors: levelColors[index],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: levelColors[index][1].withOpacity(0.4),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                right: -20,
-                                top: -20,
-                                child: CircleAvatar(
-                                  radius: 40,
-                                  backgroundColor: Colors.white.withOpacity(0.1),
-                                ),
-                              ),
-                              Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      levels[index],
-                                      style: const TextStyle(
-                                        fontSize: 42,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black26,
-                                            offset: Offset(2, 2),
-                                            blurRadius: 4,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Text(
-                                      "Daraja",
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     );
                   },
                 ),
