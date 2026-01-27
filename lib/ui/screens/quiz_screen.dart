@@ -4,7 +4,6 @@ import '../../data/models/word_model.dart';
 import '../../providers/dictionary_provider.dart';
 
 class QuizScreen extends StatefulWidget {
-  // List<WordModel> o'rniga butun UnitModel-ni qabul qilamiz
   final UnitModel unit;
   const QuizScreen({super.key, required this.unit});
 

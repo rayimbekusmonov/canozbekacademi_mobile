@@ -10,7 +10,6 @@ class WordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // DictionaryProvider-dan ma'lumotlarni olamiz
     final provider = Provider.of<DictionaryProvider>(context);
     final bool isFav = provider.isFavorite(word.tr);
 
@@ -21,18 +20,17 @@ class WordCard extends StatelessWidget {
         direction: FlipDirection.HORIZONTAL,
         front: _buildCard(
           title: word.tr,
-          subtitle: "Turkcha",
+          subtitle: "TURKCHA",
           color: Colors.blue.shade700,
           textColor: Colors.white,
           isFront: true,
           isFav: isFav,
-          // Provider-dagi markazlashgan metodlarni chaqiramiz
           onFavTap: () => provider.toggleFavorite(word.tr),
           onSpeakTap: () => provider.speak(word.tr),
         ),
         back: _buildCard(
           title: word.uz,
-          subtitle: "O'zbekcha",
+          subtitle: "O'ZBEKCHA",
           color: Colors.white,
           textColor: Colors.blue.shade900,
           example: word.example,
@@ -62,68 +60,110 @@ class WordCard extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(20), // Burchaklar biroz yumshatildi
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.1), // .withValues ishlatildi
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(subtitle, style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 12)),
-              const SizedBox(height: 10),
+              Text(
+                  subtitle,
+                  style: TextStyle(
+                      color: textColor.withValues(alpha: 0.6),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5
+                  )
+              ),
+              const SizedBox(height: 12),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold
+                ),
               ),
               if (example != null && example.isNotEmpty) ...[
-                const Divider(color: Colors.blueGrey, height: 30),
-                Text(
-                  example,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: textColor.withOpacity(0.9),
-                    fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Divider(color: Colors.blueGrey.withValues(alpha: 0.2), height: 1),
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.format_quote, size: 16, color: textColor.withValues(alpha: 0.5)),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        example,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: textColor.withValues(alpha: 0.8),
+                          fontStyle: FontStyle.italic,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ],
           ),
         ),
 
-        // Audio tugmasi (Faqat old tomonda)
+        // Audio tugmasi
         if (isFront)
           Positioned(
-            top: 10,
-            right: 10,
-            child: CircleAvatar(
-              backgroundColor: Colors.white.withOpacity(0.2),
-              child: IconButton(
-                icon: const Icon(Icons.volume_up, color: Colors.white),
-                onPressed: onSpeakTap,
+            top: 12,
+            right: 12,
+            child: Tooltip(
+              message: "Talaffuzni eshitish",
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: onSpeakTap,
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    child: const Icon(Icons.volume_up, color: Colors.white, size: 20),
+                  ),
+                ),
               ),
             ),
           ),
 
-        // Favorit (Yurakcha) tugmasi
+        // Favorit tugmasi
         Positioned(
-          top: 10,
-          left: 10,
-          child: CircleAvatar(
-            backgroundColor: isFront ? Colors.white.withOpacity(0.2) : Colors.blue.withOpacity(0.1),
-            child: IconButton(
-              icon: Icon(
-                isFav ? Icons.favorite : Icons.favorite_border,
-                color: isFav ? Colors.red : (isFront ? Colors.white : Colors.blue),
+          top: 12,
+          left: 12,
+          child: Tooltip(
+            message: isFav ? "Favoritlardan o'chirish" : "Favoritlarga qo'shish",
+            child: InkWell(
+              onTap: onFavTap,
+              borderRadius: BorderRadius.circular(20),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: isFront
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.blue.withValues(alpha: 0.05),
+                child: Icon(
+                  isFav ? Icons.favorite : Icons.favorite_border,
+                  color: isFav ? Colors.redAccent : (isFront ? Colors.white : Colors.blue.shade700),
+                  size: 20,
+                ),
               ),
-              onPressed: onFavTap,
             ),
           ),
         ),
