@@ -248,4 +248,15 @@ class DictionaryProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('failed_words', _failedWordTrs.toList());
   }
+
+  // lib/providers/dictionary_provider.dart ichiga
+
+// Xatolar ro'yxatiga qo'shish (Quiz paytida xato qilinsa chaqiriladi)
+  void addToMistakes(String wordTr) {
+    if (!_failedWordTrs.contains(wordTr)) {
+      _failedWordTrs.add(wordTr);
+      _saveMistakes(); // SharedPreferences-ga saqlash
+      notifyListeners();
+    }
+  }
 }

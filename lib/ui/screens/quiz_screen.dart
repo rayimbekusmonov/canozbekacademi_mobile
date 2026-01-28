@@ -12,59 +12,67 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late List<Map<String, dynamic>> questions;
-  int currentIndex = 0;
-  int score = 0;
-  String? selectedOption;
-  bool isAnswered = false;
-  late PageController _pageController;
+  int _currentIndex = 0;
+  int _score = 0;
+  bool _isAnswered = false;
+  String _selectedOption = "";
+  late List<WordModel> _currentWords;
+  List<String> _options = [];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-    // Unit ichidagi so'zlarni Provider-ga yuboramiz
-    questions = Provider.of<DictionaryProvider>(context, listen: false)
-        .generateQuiz(widget.unit.words);
+    _startNewQuiz();
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void _startNewQuiz() {
+    widget.unit.words.shuffle();
+    _currentWords = widget.unit.words.take(20).toList();
+    _generateOptions();
   }
 
-  void handleAnswer(String option) {
-    if (isAnswered) return;
+  // TESTNI QAYTA BOSHLASH METODI (Error bergan qism)
+  void _resetQuiz() {
+    setState(() {
+      _currentIndex = 0;
+      _score = 0;
+      _startNewQuiz();
+    });
+  }
+
+  void _generateOptions() {
+    final correctWord = _currentWords[_currentIndex];
+    List<String> options = [correctWord.uz];
+    List<WordModel> allWords = List.from(widget.unit.words)..remove(correctWord);
+    allWords.shuffle();
+    options.addAll(allWords.take(3).map((w) => w.uz));
+    options.shuffle();
 
     setState(() {
-      selectedOption = option;
-      isAnswered = true;
-      String correctAnswer = questions[currentIndex]['correct'];
-      String questionWord = questions[currentIndex]['question']; // Turkcha so'z
+      _options = options;
+      _isAnswered = false;
+      _selectedOption = "";
+    });
+  }
 
-      if (option == correctAnswer) {
-        score++;
-        // Agar avval xato qilgan bo'lsa va endi to'g'ri topsa, ro'yxatdan o'chirish mumkin (ixtiyoriy)
-        // context.read<DictionaryProvider>().removeFailedWord(questionWord);
+  void _checkAnswer(String option) {
+    if (_isAnswered) return;
+    setState(() {
+      _isAnswered = true;
+      _selectedOption = option;
+      if (option == _currentWords[_currentIndex].uz) {
+        _score++;
       } else {
-        // Xato qilingan so'zni Providerga yuboramiz
-        context.read<DictionaryProvider>().addFailedWord(questionWord);
+        // PROVAYDERDAGI YANGI METODNI CHAQIRISH
+        context.read<DictionaryProvider>().addToMistakes(_currentWords[_currentIndex].tr);
       }
     });
 
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (!mounted) return;
-
-      if (currentIndex < questions.length - 1) {
-        _pageController.nextPage(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (_currentIndex < _currentWords.length - 1) {
         setState(() {
-          currentIndex++;
-          selectedOption = null;
-          isAnswered = false;
+          _currentIndex++;
+          _generateOptions();
         });
       } else {
         _showResultDialog();
@@ -72,157 +80,117 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var currentQuestion = questions[currentIndex];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Test: ${currentIndex + 1}/${questions.length}"),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(6),
-          child: LinearProgressIndicator(
-            value: (currentIndex + 1) / questions.length,
-            backgroundColor: Colors.blue.shade100,
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
-          ),
-        ),
-      ),
-      body: PageView.builder(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: questions.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Text(
-                    currentQuestion['question'],
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                ...List.generate(currentQuestion['options'].length, (i) {
-                  String option = currentQuestion['options'][i];
-                  return _buildOptionButton(option, currentQuestion['correct']);
-                }),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildOptionButton(String option, String correct) {
-    Color cardColor = Colors.white;
-    Color textColor = Colors.black87;
-    IconData? icon;
-
-    if (isAnswered) {
-      if (option == correct) {
-        cardColor = Colors.green.shade400;
-        textColor = Colors.white;
-        icon = Icons.check_circle;
-      } else if (option == selectedOption) {
-        cardColor = Colors.red.shade400;
-        textColor = Colors.white;
-        icon = Icons.cancel;
-      }
-    }
-
-    return GestureDetector(
-      onTap: () => handleAnswer(option),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-            color: isAnswered && option == correct ? Colors.green : Colors.grey.shade300,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                option,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textColor),
-              ),
-            ),
-            if (icon != null) Icon(icon, color: Colors.white),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showResultDialog() {
-    int percent = ((score / questions.length) * 100).toInt();
-    Color resultColor = percent >= 80 ? Colors.green : (percent >= 50 ? Colors.orange : Colors.red);
-    String message = percent == 100 ? "MUKAMMAL! 🏆" : (percent >= 80 ? "AJOYIB! 🌟" : "Yaxshi, yana harakat qiling");
-    String unitKey = "${widget.unit.level}_unit${widget.unit.unitNo}";
-    context.read<DictionaryProvider>().saveScore(unitKey, percent);
+    final int percent = ((_score / _currentWords.length) * 100).toInt();
+    Color mainColor = percent >= 70 ? Colors.green : (percent >= 40 ? Colors.orange : Colors.red);
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Natijaga qarab ikonka o'zgaradi
-              Icon(
-                percent >= 70 ? Icons.stars_rounded : Icons.sentiment_dissatisfied_rounded,
-                size: 80,
-                color: percent >= 70 ? Colors.orange : Colors.blueGrey,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                percent >= 70 ? "Ajoyib natija!" : "Yana bir bor urinib ko'ring!",
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Siz ${questions.length} tadan $score ta to'g'ri topdingiz ($percent%)",
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade700,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+              Icon(percent >= 70 ? Icons.emoji_events : Icons.psychology, size: 80, color: mainColor),
+              const SizedBox(height: 20),
+              Text("$percent%", style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: mainColor)),
+              Text("$_score / ${_currentWords.length} to'g'ri", style: const TextStyle(fontSize: 18, color: Colors.grey)),
+              const SizedBox(height: 30),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Chiqish"),
+                    ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context); // Dialogni yopish
-                    Navigator.pop(context); // WordsScreen-ga qaytish
-                  },
-                  child: const Text("Tugallash", style: TextStyle(color: Colors.white)),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: mainColor),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _resetQuiz();
+                      },
+                      child: const Text("Qayta urinish", style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentWord = _currentWords[_currentIndex];
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.blue.shade800,
+        title: Text(widget.unit.unitName),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          LinearProgressIndicator(
+            value: (_currentIndex + 1) / _currentWords.length,
+            backgroundColor: Colors.blue.shade50,
+            color: Colors.orange,
+            minHeight: 8,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("TARJIMASINI TOPING", style: TextStyle(color: Colors.blue.shade300, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                  const SizedBox(height: 15),
+                  Text(currentWord.tr, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 40),
+                  ..._options.map((option) => _buildOption(option)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOption(String option) {
+    bool isCorrect = option == _currentWords[_currentIndex].uz;
+    bool isSelected = option == _selectedOption;
+    Color borderColor = _isAnswered ? (isCorrect ? Colors.green : (isSelected ? Colors.red : Colors.grey.shade200)) : Colors.grey.shade200;
+
+    return GestureDetector(
+      onTap: () => _checkAnswer(option),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: _isAnswered && isCorrect ? Colors.green.shade50 : (_isAnswered && isSelected ? Colors.red.shade50 : Colors.white),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: borderColor, width: 2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(option, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            if (_isAnswered && isCorrect) const Icon(Icons.check_circle, color: Colors.green),
+            if (_isAnswered && isSelected && !isCorrect) const Icon(Icons.cancel, color: Colors.red),
+          ],
         ),
       ),
     );
