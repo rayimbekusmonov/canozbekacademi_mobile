@@ -1,20 +1,22 @@
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
+    // Firebase uchun
     id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // Flutter plugin har doim oxirida bo'lishi kerak
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
+    // Sening loyihang paketi
     namespace = "com.rayimbek.canozbekacademi"
-    compileSdk = flutter.compileSdkVersion
+
+    // Android 14 (API 34) darajasida build qilamiz
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        // Desugaring yoqildi: Bu flutter_local_notifications uchun shart
+        // Desugaring - eski Androidlarda yangi Java funksiyalarini ishlatish uchun (Notification uchun shart)
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -26,20 +28,28 @@ android {
 
     defaultConfig {
         applicationId = "com.rayimbek.canozbekacademi"
-        // minSdk ni 21 qilish tavsiya etiladi (Desugaring va zamonaviy APIlar uchun)
+
+        // Android 5.0 dan past telefonlarni qo'llab-quvvatlamaymiz (Notification barqarorligi uchun)
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+
+        // Target API 34 - bu ruxsatnomalar chiqishini ta'minlaydi
+        targetSdk = 36
+
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Metodlar soni ko'payib ketsa xatolik bermasligi uchun
+        // Metodlar ko'payib ketsa xato bermasligi uchun
         multiDexEnabled = true
     }
 
     buildTypes {
         release {
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Hozircha debug kaliti bilan imzolaymiz
             signingConfig = signingConfigs.getByName("debug")
+
+            // Release versiyada kodni siqish (ixtiyoriy)
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
@@ -49,6 +59,6 @@ flutter {
 }
 
 dependencies {
-    // Java 8+ funksiyalarini eski Androidlarda qo'llash uchun kutubxona
+    // Notification-lar va Timezone to'g'ri ishlashi uchun desugaring kutubxonasi
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

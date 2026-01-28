@@ -1,30 +1,44 @@
-import 'package:canozbekacademi/ui/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'core/services/notification_service.dart';
-import 'providers/dictionary_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'core/services/notification_service.dart';
 import 'firebase_options.dart';
 
+// Sening fayllaring (Yo'llarni (path) o'zingniki bilan tekshirib ol)
+import 'providers/dictionary_provider.dart';
+import 'ui/screens/splash_screen.dart'; // Splash orqali kiramiz
+// import 'services/notification_service.dart';
+
 void main() async {
+  // 1. Flutter engine bilan bog'lanishni ta'minlash
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. Firebase-ni ishga tushirish
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // 2. Firebase-ni ishga tushirish (agar firebase bo'lsa)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("Firebase muvaffaqiyatli ulandi!");
+  } catch (e) {
+    print("Firebase ulanishda xato: $e");
+  }
 
-  // 2. Provayderni yaratish va ma'lumotlarni yuklash
-  final dictionaryProvider = DictionaryProvider();
-  await dictionaryProvider.init(); // JSON-larni yuklash va boshqa sozlamalar
-  await dictionaryProvider.checkAndUpdateStreak(); // 🔥 Olovni yoqish aynan shu yerda
+  // 3. Bildirishnoma xizmatini sozlash
+  // Bu yerda biz ham init qilamiz, ham ruxsat so'raymiz
   await NotificationService.init();
+
+  // Kunlik eslatmani rejalashtirish
   await NotificationService.scheduleDailyNotification();
+
+  // 4. DictionaryProvider obyektini yaratish va ma'lumotlarni yuklash
+  final dictionaryProvider = DictionaryProvider();
+  await dictionaryProvider.init(); // JSON ma'lumotlarni yuklash
+  await dictionaryProvider.checkAndUpdateStreak(); // Olovni (streak) tekshirish
 
   runApp(
     MultiProvider(
       providers: [
-        // Yaratilgan tayyor obyektni MultiProvider-ga beramiz
+        // Tayyor dictionaryProvider obyektini butun ilovaga tarqatamiz
         ChangeNotifierProvider.value(value: dictionaryProvider),
       ],
       child: const MyApp(),
@@ -41,28 +55,32 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Canozbek Academy',
 
-      // YORUG'LIK REJIMIDAGI DIZAYN
+      // YORUG' REJIM
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.light,
-        cardColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+        ),
       ),
 
       // TUNGI REJIM (DARK MODE)
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-          surface: const Color(0xFF1E1E1E),
-        ),
+        colorSchemeSeed: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFF121212),
-        cardColor: const Color(0xFF1E1E1E), // Tungi rejimda kartochkalar rangi
+        cardTheme: const CardThemeData(
+          color: Color(0xFF1E1E1E),
+        ),
       ),
 
-      themeMode: ThemeMode.system, // Telefon sozlamasiga qarab o'zi almashadi
+      // Telefon sozlamasiga qarab rejimni tanlash
+      themeMode: ThemeMode.system,
+
+      // Ilova SplashScreen bilan boshlanadi (Developed by Rayimbek deb chiqadi)
       home: const SplashScreen(),
     );
   }

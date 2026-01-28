@@ -15,6 +15,7 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+
     );
 
     const settings = InitializationSettings(
@@ -30,6 +31,11 @@ class NotificationService {
     );
 
     await _requestPermissions();
+    // NotificationService.init() ichida eng pastda
+    final result = await _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
+
+    print("Notification ruxsati natijasi: $result"); // Debug console-da ko'rasan
   }
 
   static Future<void> _requestPermissions() async {
@@ -61,11 +67,13 @@ class NotificationService {
       _nextInstanceOf20PM(),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'daily_channel',
-          'Kunlik eslatmalar',
-          channelDescription: 'Har kuni soat 20:00 da eslatma',
+          'daily_channel_v2', // ID ni o'zgartirdik
+          'Kunlik Eslatmalar',
+          channelDescription: 'Canozbek Academy streak eslatmalari',
           importance: Importance.max,
           priority: Priority.high,
+          ticker: 'ticker',
+          icon: '@mipmap/ic_launcher', // Ikonkani aniq ko'rsatdik
         ),
         iOS: DarwinNotificationDetails(),
       ),
@@ -78,7 +86,7 @@ class NotificationService {
 
   static tz.TZDateTime _nextInstanceOf20PM() {
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 25);
+    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 55);
 
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
