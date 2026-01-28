@@ -26,6 +26,67 @@ class DictionaryProvider with ChangeNotifier {
 
   int get completedUnitsCount => _unitScores.length;
 
+  int _streakCount = 0;
+  int get streakCount => _streakCount;
+
+  Future<void> checkAndUpdateStreak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastVisit = prefs.getString('last_visit_date');
+    final savedStreak = prefs.getInt('streak_count') ?? 0;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (lastVisit != null) {
+      final lastDate = DateTime.parse(lastVisit);
+      final difference = today.difference(lastDate).inDays;
+
+      if (difference == 1) {
+        // Kecha kirgan edi, streak davom etadi
+        _streakCount = savedStreak + 1;
+      } else if (difference == 0) {
+        // Bugun allaqachon kirgan
+        _streakCount = savedStreak;
+      } else {
+        // Uzilish bo'lgan (1 kundan ko'p), streak 1 dan boshlanadi
+        _streakCount = 1;
+      }
+    } else {
+      // Ilovaga birinchi marta kirishi
+      _streakCount = 1;
+    }
+
+    // Ma'lumotlarni saqlaymiz
+    await prefs.setString('last_visit_date', today.toIso8601String());
+    await prefs.setInt('streak_count', _streakCount);
+
+    // UI-ga o'zgarishni bildiramiz
+    notifyListeners();
+  }
+
+  void updateStreak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastVisit = prefs.getString('last_visit');
+    final today = DateTime.now().toIso8601String().substring(0, 10); // "2026-01-28"
+
+    if (lastVisit == null) {
+      _streakCount = 1;
+    } else {
+      final lastVisitDate = DateTime.parse(lastVisit);
+      final difference = DateTime.now().difference(lastVisitDate).inDays;
+
+      if (difference == 1) {
+        _streakCount++; // Kecha ham kirgan edi
+      } else if (difference > 1) {
+        _streakCount = 1; // Bir kundan ko'p tashlab ketgan, streak uzildi
+      }
+    }
+
+    await prefs.setString('last_visit', today);
+    await prefs.setInt('streak_count', _streakCount);
+    notifyListeners();
+  }
+
   // --- STATISTIKA ---
   double get averageScore {
     if (_unitScores.isEmpty) return 0.0;

@@ -23,31 +23,66 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       drawer: _buildDrawer(context),
       appBar: AppBar(
         elevation: 0,
+        // Title qismini Search Bar-ga aylantiramiz
+        title: InkWell(
+          onTap: () {
+            showSearch(
+              context: context,
+              delegate: WordSearchDelegate(allWords: context.read<DictionaryProvider>().allWords),
+            );
+          },
+          child: Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                const Icon(Icons.search_rounded, color: Colors.white70, size: 20),
+                const SizedBox(width: 10),
+                Text(
+                  "Canozbek Academy — Qidirish",
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ),
         centerTitle: true,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue.shade800, Colors.blue.shade500],
+              colors: isDark
+                  ? [Colors.blueGrey.shade900, Colors.black]
+                  : [Colors.blue.shade800, Colors.blue.shade500],
             ),
           ),
         ),
-        title: const Text(
-          'Canozbek Academy',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
-        ),
         actions: [
-          IconButton(
-            tooltip: "Sinxronizatsiya",
-            icon: const Icon(Icons.cloud_upload_outlined, color: Colors.white70),
-            onPressed: () async {
-              await context.read<DictionaryProvider>().syncAllDataToFirestore();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Ma'lumotlar sinxronizatsiya qilindi!")),
+          // STREAK (OLOV)
+          Consumer<DictionaryProvider>(
+            builder: (context, provider, child) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 24),
+                    const SizedBox(width: 2),
+                    Text(
+                      "${provider.streakCount}",
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -55,36 +90,30 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // KUN SO'ZI VA XATOLAR (Birlashtirilgan blok)
           _buildTopInfoCard(context),
-
-          // DARAJALAR GRID
-          Expanded(
-            child: _buildLevelsGrid(),
-          ),
-
-          // FOOTER (Imzo bilan)
-          _buildFooter(),
+          Expanded(child: _buildLevelsGrid()),
+          _buildFooter(context),
         ],
       ),
     );
   }
 
-  // --- TOP INFO CARD (Daily Word + Mistakes) ---
+  // --- KUN SO'ZI VA XATOLAR KARTASI ---
   Widget _buildTopInfoCard(BuildContext context) {
     return Consumer<DictionaryProvider>(
       builder: (context, provider, child) {
         final dailyWord = provider.dailyWord;
         final hasMistakes = provider.failedWordTrs.isNotEmpty;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
 
         return Container(
           margin: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               )
@@ -92,7 +121,6 @@ class HomeScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Kun so'zi qismi
               if (dailyWord != null)
                 Padding(
                   padding: const EdgeInsets.all(20),
@@ -106,39 +134,43 @@ class HomeScreen extends StatelessWidget {
                                 style: TextStyle(color: Colors.blue.shade300, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                             const SizedBox(height: 8),
                             Text(dailyWord.tr, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                            Text(dailyWord.uz, style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                            Text(dailyWord.uz, style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
                           ],
                         ),
                       ),
                       IconButton(
                         onPressed: () => provider.speak(dailyWord.tr),
                         icon: const Icon(Icons.volume_up_rounded, color: Colors.blue),
-                        style: IconButton.styleFrom(backgroundColor: Colors.blue.shade50),
+                        style: IconButton.styleFrom(backgroundColor: Colors.blue.withValues(alpha: 0.1)),
                       ),
                     ],
                   ),
                 ),
 
-              // Xatolar qismi (Alohida banner emas, nafis qator)
               if (hasMistakes)
                 InkWell(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MistakesScreen())),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.amber.shade50, // Qizil o'rniga yumshoq sariq
+                      color: isDark ? Colors.amber.withValues(alpha: 0.1) : Colors.amber.shade50,
                       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.auto_fix_high_rounded, size: 18, color: Colors.amber.shade800),
+                        Icon(Icons.auto_fix_high_rounded, size: 18, color: isDark ? Colors.amber.shade300 : Colors.amber.shade800),
                         const SizedBox(width: 10),
                         Text(
                           "${provider.failedWordTrs.length} ta xatoni tuzatamizmi?",
-                          style: TextStyle(color: Colors.amber.shade900, fontWeight: FontWeight.w600, fontSize: 13),
+                          style: TextStyle(
+                              color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13
+                          ),
                         ),
                         const Spacer(),
-                        Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.amber.shade800),
+                        Icon(Icons.arrow_forward_ios_rounded, size: 12, color: isDark ? Colors.amber.shade300 : Colors.amber.shade800),
                       ],
                     ),
                   ),
@@ -203,25 +235,24 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // --- YON MENYU (DRAWER) ---
+  // --- DRAWER ---
   Widget _buildDrawer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Drawer(
       child: Column(
         children: [
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.blue.shade900, Colors.blue.shade600])),
+            decoration: BoxDecoration(
+                gradient: LinearGradient(colors: isDark ? [Colors.black, Colors.blueGrey.shade900] : [Colors.blue.shade900, Colors.blue.shade600])
+            ),
             currentAccountPicture: const CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.school_rounded, size: 40, color: Colors.blue)),
             accountName: const Text("Canozbek Academy", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             accountEmail: const Text("Bilim — qudratdir!"),
           ),
-          _drawerItem(context, Icons.search, "So'z qidirish", () {
-            showSearch(context: context, delegate: WordSearchDelegate(allWords: context.read<DictionaryProvider>().allWords));
-          }),
           _drawerItem(context, Icons.favorite, "Sevimli so'zlar", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritesScreen()))),
           _drawerItem(context, Icons.bar_chart_rounded, "Statistika", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()))),
           _drawerItem(context, Icons.settings, "Sozlamalar", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()))),
           const Spacer(),
-          const Divider(indent: 20, endIndent: 20),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(
@@ -229,12 +260,13 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.code_rounded, size: 16, color: Colors.blue.shade800),
+                    Icon(Icons.code_rounded, size: 16, color: Colors.blue.shade400),
                     const SizedBox(width: 8),
                     const Text("Developed by Rayimbek", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey, fontSize: 14)),
                   ],
                 ),
-                Text("Versiya 1.0.0", style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                const SizedBox(height: 4),
+                Text("Versiya 1.0.0", style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
               ],
             ),
           ),
@@ -245,27 +277,21 @@ class HomeScreen extends StatelessWidget {
 
   Widget _drawerItem(BuildContext context, IconData icon, String text, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: Colors.blue.shade800),
+      leading: Icon(icon, color: Colors.blue.shade400),
       title: Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
       onTap: () { Navigator.pop(context); onTap(); },
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 15),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.auto_awesome, size: 14, color: Colors.blue.shade300),
-              const SizedBox(width: 8),
-              Text("Bilim olishdan to'xtamang!", style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 13, fontStyle: FontStyle.italic)),
-            ],
-          ),
+          Text("Bilim olishdan to'xtamang!",
+              style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 12, fontStyle: FontStyle.italic)),
           const SizedBox(height: 4),
-          Text("© 2026 Canozbek Academy", style: TextStyle(color: Colors.grey.shade400, fontSize: 10)),
+          Text("© 2026 Canozbek Academy", style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
         ],
       ),
     );
