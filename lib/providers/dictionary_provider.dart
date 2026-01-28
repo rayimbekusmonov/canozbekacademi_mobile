@@ -230,4 +230,22 @@ class DictionaryProvider with ChangeNotifier {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     // ... mavjud sync mantiqi
   }
+
+  // lib/providers/dictionary_provider.dart ichida
+
+  void removeFromMistakes(String wordTr) {
+    // Ro'yxatdan o'chiramiz
+    _failedWordTrs.remove(wordTr);
+
+    // Mahalliylashtirilgan xotirada (SharedPreferences) ham saqlab qo'yamiz
+    _saveMistakes();
+
+    // UI-ga "xato o'chirildi, qayta chiz!" deb xabar beramiz
+    notifyListeners();
+  }
+
+  Future<void> _saveMistakes() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('failed_words', _failedWordTrs.toList());
+  }
 }
