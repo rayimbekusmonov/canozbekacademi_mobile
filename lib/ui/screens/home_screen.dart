@@ -19,15 +19,15 @@ class HomeScreen extends StatelessWidget {
     [Colors.red.shade400, Colors.red.shade900],
   ];
 
+  HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // YON MENYU QO'SHILDI
+      backgroundColor: Colors.grey.shade50,
       drawer: _buildDrawer(context),
-
       appBar: AppBar(
         elevation: 0,
-        // centerTitle: true orqali nomni markazga olamiz
         centerTitle: true,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -40,10 +40,10 @@ class HomeScreen extends StatelessWidget {
           'Canozbek Academy',
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
         ),
-        // AppBar-da faqat zaruriy Sync tugmasini qoldirish mumkin yoki uni ham menyuga olish mumkin
         actions: [
           IconButton(
-            icon: const Icon(Icons.cloud_upload, color: Colors.white70),
+            tooltip: "Sinxronizatsiya",
+            icon: const Icon(Icons.cloud_upload_outlined, color: Colors.white70),
             onPressed: () async {
               await context.read<DictionaryProvider>().syncAllDataToFirestore();
               ScaffoldMessenger.of(context).showSnackBar(
@@ -53,25 +53,20 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(color: Colors.grey.shade50),
-        child: Column(
-          children: [
-            // Kun so'zi bo'limi
-            _buildDailyWordCard(),
-
-            // Xatolar bo'limi
-            _buildMistakesCard(),
-
-            // Darajalar ro'yxati (Grid)
-            _buildLevelsGrid(),
-          ],
-        ),
+      body: Column(
+        children: [
+          _buildDailyWordCard(),
+          _buildMistakesCard(),
+          // Grid endi asosiy bo'shliqni egallaydi
+          _buildLevelsGrid(),
+          // Pastki qismdagi nafis imzo/footer
+          _buildFooter(),
+        ],
       ),
     );
   }
 
-  // --- DRAWER (YON MENYU) ---
+  // --- YON MENYU (DRAWER) ---
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: Column(
@@ -84,10 +79,11 @@ class HomeScreen extends StatelessWidget {
             ),
             currentAccountPicture: const CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.school, size: 40, color: Colors.blue),
+              child: Icon(Icons.school_rounded, size: 40, color: Colors.blue),
             ),
-            accountName: const Text("Canozbek Academy", style: TextStyle(fontWeight: FontWeight.bold)),
-            accountEmail: const Text("Til o'rganish markazi"),
+            accountName: const Text("Canozbek Academy",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            accountEmail: const Text("Muvaffaqiyat kaliti — bilimda!"),
           ),
           _drawerItem(
             icon: Icons.search,
@@ -127,10 +123,34 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           const Spacer(),
-          const Divider(),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text("v 1.0.0", style: TextStyle(color: Colors.grey, fontSize: 12)),
+          const Divider(indent: 20, endIndent: 20),
+          // --- MENYU PASTIDAGI IMZO ---
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.code_rounded, size: 16, color: Colors.blue.shade800),
+                    const SizedBox(width: 8),
+                    const Text(
+                      "Developed by Rayimbek",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueGrey,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Versiya 1.0.0",
+                  style: TextStyle(color: Colors.grey.shade400, fontSize: 11),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -171,9 +191,10 @@ class HomeScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.lightbulb_outline, color: Colors.orange.shade700),
+                  Icon(Icons.lightbulb_outline, color: Colors.orange.shade700, size: 20),
                   const SizedBox(width: 8),
-                  Text("Kun so'zi", style: TextStyle(color: Colors.blue.shade800, fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text("KUN SO'ZI",
+                      style: TextStyle(color: Colors.blue.shade800, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.1)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -184,8 +205,8 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(dailyWord.tr, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
-                        Text(dailyWord.uz, style: TextStyle(fontSize: 18, color: Colors.grey.shade600)),
+                        Text(dailyWord.tr, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
+                        Text(dailyWord.uz, style: TextStyle(fontSize: 17, color: Colors.grey.shade600)),
                       ],
                     ),
                   ),
@@ -209,7 +230,7 @@ class HomeScreen extends StatelessWidget {
         if (provider.failedWordTrs.isEmpty) return const SizedBox.shrink();
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
           child: InkWell(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MistakesScreen())),
             borderRadius: BorderRadius.circular(15),
@@ -218,22 +239,16 @@ class HomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [Colors.red.shade400, Colors.red.shade700]),
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.psychology_outlined, color: Colors.white, size: 30),
+                  const Icon(Icons.psychology_alt_outlined, color: Colors.white, size: 28),
                   const SizedBox(width: 15),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Xatolar ustida ishlash", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text("Sizda ${provider.failedWordTrs.length} ta xato so'z bor", style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                      ],
-                    ),
+                    child: Text("Xatolar ustida ishlash (${provider.failedWordTrs.length})",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
-                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
                 ],
               ),
             ),
@@ -245,65 +260,98 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildLevelsGrid() {
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 0.9, // Overlow xatosini oldini olish uchun biroz kattartirildi
-          ),
-          itemCount: levels.length,
-          itemBuilder: (context, index) {
-            final String currentLevel = levels[index];
-            return Consumer<DictionaryProvider>(
-              builder: (context, provider, child) {
-                final double progress = provider.getLevelProgress(currentLevel);
-                return GestureDetector(
-                  onTap: () {
-                    final filteredUnits = provider.getUnitsByLevel(currentLevel);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => UnitsScreen(units: filteredUnits, level: currentLevel)));
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      gradient: LinearGradient(colors: levelColors[index], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                      boxShadow: [BoxShadow(color: levelColors[index][1].withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 6))],
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(right: -20, top: -20, child: CircleAvatar(radius: 40, backgroundColor: Colors.white.withValues(alpha: 0.1))),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(currentLevel, style: const TextStyle(fontSize: 38, color: Colors.white, fontWeight: FontWeight.bold)),
-                              const Text("Daraja", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                              const SizedBox(height: 15),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: LinearProgressIndicator(
-                                  value: progress,
-                                  minHeight: 6,
-                                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text("${(progress * 100).toInt()}%", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+      child: GridView.builder(
+        padding: const EdgeInsets.all(20),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 15,
+          mainAxisSpacing: 15,
+          childAspectRatio: 0.95,
         ),
+        itemCount: levels.length,
+        itemBuilder: (context, index) {
+          final String currentLevel = levels[index];
+          return Consumer<DictionaryProvider>(
+            builder: (context, provider, child) {
+              final double progress = provider.getLevelProgress(currentLevel);
+              return GestureDetector(
+                onTap: () {
+                  final filteredUnits = provider.getUnitsByLevel(currentLevel);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => UnitsScreen(units: filteredUnits, level: currentLevel)));
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    gradient: LinearGradient(colors: levelColors[index], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    boxShadow: [
+                      BoxShadow(
+                        color: levelColors[index][1].withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(right: -10, top: -10, child: CircleAvatar(radius: 30, backgroundColor: Colors.white.withValues(alpha: 0.1))),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(currentLevel, style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 5,
+                                backgroundColor: Colors.white24,
+                                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text("${(progress * 100).toInt()}%", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome, size: 14, color: Colors.blue.shade300),
+              const SizedBox(width: 8),
+              Text(
+                "Bilim olishdan to'xtamang!",
+                style: TextStyle(
+                  color: Colors.blueGrey.shade400,
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "© 2026 Canozbek Academy",
+            style: TextStyle(color: Colors.grey.shade400, fontSize: 10),
+          ),
+        ],
       ),
     );
   }
