@@ -84,6 +84,14 @@ class _QuizScreenState extends State<QuizScreen> {
     final int percent = ((_score / _currentWords.length) * 100).toInt();
     Color mainColor = percent >= 70 ? Colors.green : (percent >= 40 ? Colors.orange : Colors.red);
 
+    // --- STATISTIKANI SAQLASH QISMI (SHU YERDA MO'JIZA YUZ BERADI) ---
+    final provider = context.read<DictionaryProvider>();
+    // Kalit so'zni shakllantiramiz (masalan: "A1_unit1")
+    String unitKey = "${widget.unit.level}_unit${widget.unit.unitNo}";
+    // Providerdagi saveScore metodini chaqiramiz
+    provider.saveScore(unitKey, _score);
+    // --------------------------------------------------------------
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -94,18 +102,21 @@ class _QuizScreenState extends State<QuizScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(percent >= 70 ? Icons.emoji_events : Icons.psychology, size: 80, color: mainColor),
+              Icon(percent >= 70 ? Icons.emoji_events : Icons.psychology,
+                  size: 80, color: mainColor),
               const SizedBox(height: 20),
-              Text("$percent%", style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: mainColor)),
-              Text("$_score / ${_currentWords.length} to'g'ri", style: const TextStyle(fontSize: 18, color: Colors.grey)),
+              Text("$percent%",
+                  style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: mainColor)),
+              Text("$_score / ${_currentWords.length} to'g'ri",
+                  style: const TextStyle(fontSize: 18, color: Colors.grey)),
               const SizedBox(height: 30),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        Navigator.pop(context); // Dialogni yopish
+                        Navigator.pop(context); // QuizScreen-dan chiqish
                       },
                       child: const Text("Chiqish"),
                     ),
@@ -115,8 +126,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: mainColor),
                       onPressed: () {
-                        Navigator.pop(context);
-                        _resetQuiz();
+                        Navigator.pop(context); // Dialogni yopish
+                        _resetQuiz(); // Testni qayta boshlash
                       },
                       child: const Text("Qayta urinish", style: TextStyle(color: Colors.white)),
                     ),

@@ -100,10 +100,16 @@ class DictionaryProvider with ChangeNotifier {
 
     int completedInLevel = 0;
     for (var unit in levelUnits) {
+      // UNIT KEY SHAKLLANTIRISH (QuizScreen bilan bir xil bo'lishi shart)
       String key = "${unit.level}_unit${unit.unitNo}";
-      if (_unitScores.containsKey(key)) completedInLevel++;
+
+      if (_unitScores.containsKey(key)) {
+        completedInLevel++;
+      }
     }
-    return completedInLevel / levelUnits.length;
+
+    double progress = completedInLevel / levelUnits.length;
+    return progress;
   }
 
   // --- SOZLAMALAR (TTS) ---
@@ -190,11 +196,17 @@ class DictionaryProvider with ChangeNotifier {
 
   // --- TEST NATIJALARI ---
   Future<void> saveScore(String unitKey, int score) async {
+    print("Statistika: $unitKey uchun $score ball saqlashga keldi."); // DEBUG
+
     if (score > (_unitScores[unitKey] ?? 0)) {
       _unitScores[unitKey] = score;
       final prefs = await SharedPreferences.getInstance();
+
+      // JSON formatda saqlash
       await prefs.setString('unit_scores', json.encode(_unitScores));
-      notifyListeners();
+
+      print("Statistika: Muvaffaqiyatli saqlandi! Hozirgi natijalar: $_unitScores"); // DEBUG
+      notifyListeners(); // UI darhol yangilanishi uchun
     }
   }
 
@@ -310,7 +322,6 @@ class DictionaryProvider with ChangeNotifier {
     await prefs.setStringList('failed_words', _failedWordTrs.toList());
   }
 
-  // lib/providers/dictionary_provider.dart ichiga
 
 // Xatolar ro'yxatiga qo'shish (Quiz paytida xato qilinsa chaqiriladi)
   void addToMistakes(String wordTr) {
