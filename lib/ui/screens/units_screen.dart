@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Provider qo'shildi
+import 'package:provider/provider.dart';
 import '../../data/models/word_model.dart';
-import '../../providers/dictionary_provider.dart'; // Provider-ni import qiling
+import '../../providers/dictionary_provider.dart';
 import 'words_screen.dart';
 
 class UnitsScreen extends StatelessWidget {
@@ -21,25 +21,20 @@ class UnitsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         itemCount: units.length,
         separatorBuilder: (context, index) => const SizedBox(height: 12),
-        // units_screen.dart faylidagi itemBuilder qismini quyidagicha almashtiring:
-
         itemBuilder: (context, index) {
           final unit = units[index];
           final String unitKey = "${unit.level}_unit${unit.unitNo}";
 
           return Consumer<DictionaryProvider>(
             builder: (context, provider, child) {
-              final int? score = (provider as dynamic).unitScores != null
-                  ? (provider as dynamic).unitScores[unitKey]
-                  : null;
+              final int? score = provider.unitScores[unitKey];
 
-              return Card( // ListTile-ni Card-ga o'raymiz
-                elevation: 2, // Soya effekti endi Card-da ishlaydi
+              return Card(
+                elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: ListTile(
-                  // tileColor: Colors.white, // Agar Card ishlatilsa bunga hojat yo'q
                   leading: CircleAvatar(
                     backgroundColor: Colors.blue.shade100,
                     child: Text(

@@ -26,25 +26,19 @@ class NotificationService {
     await _notifications.initialize(
       settings,
       onDidReceiveNotificationResponse: (details) {
-        // Bildirishnoma bosilganda bajariladigan amal
       },
     );
 
     await _requestPermissions();
-    // NotificationService.init() ichida eng pastda
-    final result = await _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
-
-    print("Notification ruxsati natijasi: $result"); // Debug console-da ko'rasan
   }
 
   static Future<void> _requestPermissions() async {
-    // XATOLIK TUZATILDI: < > belgilari qo'shildi
     final android = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
     if (android != null) {
-      await android.requestNotificationsPermission();
+      final result = await android.requestNotificationsPermission();
+      print("Notification ruxsati natijasi: $result");
     }
 
     final ios = _notifications.resolvePlatformSpecificImplementation<
@@ -86,7 +80,7 @@ class NotificationService {
 
   static tz.TZDateTime _nextInstanceOf20PM() {
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 55);
+    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, 11, 15);
 
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));

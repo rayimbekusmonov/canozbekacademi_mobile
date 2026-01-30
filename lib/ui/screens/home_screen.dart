@@ -29,7 +29,6 @@ class HomeScreen extends StatelessWidget {
       drawer: _buildDrawer(context),
       appBar: AppBar(
         elevation: 0,
-        // Title qismini Search Bar-ga aylantiramiz
         title: InkWell(
           onTap: () {
             showSearch(
@@ -40,18 +39,21 @@ class HomeScreen extends StatelessWidget {
           child: Container(
             height: 42,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: Colors.white.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
                 const Icon(Icons.search_rounded, color: Colors.white70, size: 20),
                 const SizedBox(width: 10),
-                Text(
-                  "Canozbek Academy — Qidirish",
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, fontWeight: FontWeight.w500),
+                Expanded(
+                  child: Text(
+                    "Canozbek Academy — Qidirish",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                  ),
                 ),
               ],
             ),
@@ -68,7 +70,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          // STREAK (OLOV)
           Consumer<DictionaryProvider>(
             builder: (context, provider, child) {
               return Padding(
@@ -91,15 +92,15 @@ class HomeScreen extends StatelessWidget {
       body: Column(
         children: [
           _buildTopInfoCard(context),
-          Expanded(child: _buildLevelsGrid()),
+          Expanded(child: _buildLevelsGrid(context)),
           _buildFooter(context),
         ],
       ),
     );
   }
 
-  // --- KUN SO'ZI VA XATOLAR KARTASI ---
   Widget _buildTopInfoCard(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Consumer<DictionaryProvider>(
       builder: (context, provider, child) {
         final dailyWord = provider.dailyWord;
@@ -107,13 +108,13 @@ class HomeScreen extends StatelessWidget {
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
         return Container(
-          margin: const EdgeInsets.all(20),
+          margin: EdgeInsets.all(screenWidth * 0.05),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               )
@@ -123,7 +124,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               if (dailyWord != null)
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(screenWidth * 0.05),
                   child: Row(
                     children: [
                       Expanded(
@@ -141,7 +142,7 @@ class HomeScreen extends StatelessWidget {
                       IconButton(
                         onPressed: () => provider.speak(dailyWord.tr),
                         icon: const Icon(Icons.volume_up_rounded, color: Colors.blue),
-                        style: IconButton.styleFrom(backgroundColor: Colors.blue.withValues(alpha: 0.1)),
+                        style: IconButton.styleFrom(backgroundColor: Colors.blue.withOpacity(0.1)),
                       ),
                     ],
                   ),
@@ -152,21 +153,24 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MistakesScreen())),
                   borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: screenWidth * 0.05),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.amber.withValues(alpha: 0.1) : Colors.amber.shade50,
+                      color: isDark ? Colors.amber.withOpacity(0.1) : Colors.amber.shade50,
                       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.auto_fix_high_rounded, size: 18, color: isDark ? Colors.amber.shade300 : Colors.amber.shade800),
                         const SizedBox(width: 10),
-                        Text(
-                          "${provider.failedWordTrs.length} ta xatoni tuzatamizmi?",
-                          style: TextStyle(
-                              color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13
+                        Expanded(
+                          child: Text(
+                            "${provider.failedWordTrs.length} ta xatoni tuzatamizmi?",
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13
+                            ),
                           ),
                         ),
                         const Spacer(),
@@ -182,15 +186,18 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // --- DARAJALAR GRID ---
-  Widget _buildLevelsGrid() {
+  Widget _buildLevelsGrid(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth > 600 ? 3 : 2;
+    final childAspectRatio = screenWidth > 600 ? 1.0 : 0.95;
+
     return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-        childAspectRatio: 0.95,
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: screenWidth * 0.04,
+        mainAxisSpacing: screenWidth * 0.04,
+        childAspectRatio: childAspectRatio,
       ),
       itemCount: levels.length,
       itemBuilder: (context, index) {
@@ -204,11 +211,11 @@ class HomeScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
                   gradient: LinearGradient(colors: levelColors[index], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                  boxShadow: [BoxShadow(color: levelColors[index][1].withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
+                  boxShadow: [BoxShadow(color: levelColors[index][1].withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
                 ),
                 child: Stack(
                   children: [
-                    Positioned(right: -10, top: -10, child: CircleAvatar(radius: 30, backgroundColor: Colors.white.withValues(alpha: 0.1))),
+                    Positioned(right: -10, top: -10, child: CircleAvatar(radius: 30, backgroundColor: Colors.white.withOpacity(0.1))),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -235,7 +242,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // --- DRAWER ---
   Widget _buildDrawer(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Drawer(
