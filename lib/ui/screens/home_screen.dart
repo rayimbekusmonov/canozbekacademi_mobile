@@ -3,6 +3,7 @@ import 'package:canozbekacademi/ui/screens/statistics_screen.dart';
 import 'package:canozbekacademi/ui/screens/units_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/support_service.dart';
 import '../../providers/dictionary_provider.dart';
 import 'favorites_screen.dart';
 import 'mistakes_screen.dart';
@@ -249,16 +250,44 @@ class HomeScreen extends StatelessWidget {
         children: [
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
-                gradient: LinearGradient(colors: isDark ? [Colors.black, Colors.blueGrey.shade900] : [Colors.blue.shade900, Colors.blue.shade600])
+                gradient: LinearGradient(
+                    colors: isDark
+                        ? [Colors.black, Colors.blueGrey.shade900]
+                        : [Colors.blue.shade900, Colors.blue.shade600]
+                )
             ),
-            currentAccountPicture: const CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.school_rounded, size: 40, color: Colors.blue)),
-            accountName: const Text("Canozbek Academy", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.school_rounded, size: 40, color: Colors.blue)
+            ),
+            accountName: const Text("Canozbek Academy",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             accountEmail: const Text("Bilim — qudratdir!"),
           ),
-          _drawerItem(context, Icons.favorite, "Sevimli so'zlar", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritesScreen()))),
-          _drawerItem(context, Icons.bar_chart_rounded, "Statistika", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()))),
-          _drawerItem(context, Icons.settings, "Sozlamalar", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()))),
+
+          // Mavjud elementlar
+          _drawerItem(context, Icons.favorite, "Sevimli so'zlar",
+                  () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritesScreen()))),
+          _drawerItem(context, Icons.bar_chart_rounded, "Statistika",
+                  () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()))),
+          _drawerItem(context, Icons.settings, "Sozlamalar",
+                  () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()))),
+
+          // --- MANA BU YANGI BO'LIM (MUROJAAT) ---
+          const Divider(), // Ajratuvchi chiziq
+          _drawerItem(
+            context,
+            Icons.headset_mic_rounded, // Yordam ikonkani
+            "Murojaat va yordam",
+                () {
+              Navigator.pop(context); // Avval menyuni yopamiz
+              SupportService.connectToSupport(); // Keyin Telegramni ochamiz
+            },
+          ),
+          // ---------------------------------------
+
           const Spacer(),
+
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(
@@ -268,7 +297,8 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Icon(Icons.code_rounded, size: 16, color: Colors.blue.shade400),
                     const SizedBox(width: 8),
-                    const Text("Developed by Rayimbek", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey, fontSize: 14)),
+                    const Text("Developed by Rayimbek",
+                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey, fontSize: 14)),
                   ],
                 ),
                 const SizedBox(height: 4),
