@@ -29,27 +29,150 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _pickNotificationTime() async {
-    final picked = await showTimePicker(
+    int tempHour = _notifHour;
+    int tempMinute = _notifMinute;
+
+    final result = await showDialog<bool>(
       context: context,
-      initialTime: TimeOfDay(hour: _notifHour, minute: _notifMinute),
-      helpText: "Eslatma vaqtini tanlang",
-      cancelText: "Bekor",
-      confirmText: "Saqlash",
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+              title: const Text("Eslatma vaqti",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Soat
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            tempHour = (tempHour + 1) % 24;
+                          });
+                        },
+                        icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 30),
+                      ),
+                      Container(
+                        width: 70,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.08) : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Text(
+                            tempHour.toString().padLeft(2, '0'),
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : const Color(0xFF0D47A1),
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            tempHour = (tempHour - 1 + 24) % 24;
+                          });
+                        },
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+                      ),
+                    ],
+                  ),
+
+                  // Ikki nuqta
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(":", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                  ),
+
+                  // Daqiqa
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            tempMinute = (tempMinute + 5) % 60;
+                          });
+                        },
+                        icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 30),
+                      ),
+                      Container(
+                        width: 70,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.08) : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Text(
+                            tempMinute.toString().padLeft(2, '0'),
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : const Color(0xFF0D47A1),
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            tempMinute = (tempMinute - 5 + 60) % 60;
+                          });
+                        },
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text("Bekor"),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0D47A1),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: const Text("Saqlash", style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
-    if (picked != null) {
+    if (result == true) {
       setState(() {
-        _notifHour = picked.hour;
-        _notifMinute = picked.minute;
+        _notifHour = tempHour;
+        _notifMinute = tempMinute;
       });
-      await NotificationService.setNotificationTime(picked.hour, picked.minute);
+      await NotificationService.setNotificationTime(tempHour, tempMinute);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Eslatma vaqti: ${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')} ga o'zgartirildi",
+              "Eslatma vaqti: ${tempHour.toString().padLeft(2, '0')}:${tempMinute.toString().padLeft(2, '0')} ga o'zgartirildi",
             ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
