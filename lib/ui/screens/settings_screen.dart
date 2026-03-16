@@ -58,12 +58,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sozlamalar"),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.blueGrey, Colors.grey]),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ?  [Colors.blueGrey.shade900, Colors.black]
+                  :  [const Color(0xFF455A64), const Color(0xFF37474F)],
+            ),
           ),
         ),
       ),
