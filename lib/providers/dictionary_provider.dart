@@ -4,7 +4,6 @@ import '../data/models/word_model.dart';
 import '../core/services/dictionary_service.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class DictionaryProvider with ChangeNotifier {
@@ -279,14 +278,6 @@ class DictionaryProvider with ChangeNotifier {
     }
     return words;
   }
-
-  // --- FIRESTORE SYNC ---
-  Future<void> syncAllDataToFirestore() async {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    // ... mavjud sync mantiqi
-  }
-
-  // lib/providers/dictionary_provider.dart ichida
 
   void removeFromMistakes(String wordTr) {
     // Ro'yxatdan o'chiramiz

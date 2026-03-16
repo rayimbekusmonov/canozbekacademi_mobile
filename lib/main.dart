@@ -1,33 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'core/services/notification_service.dart';
 import 'firebase_options.dart';
-
-// Sening fayllaring (Yo'llarni (path) o'zingniki bilan tekshirib ol)
 import 'providers/dictionary_provider.dart';
-import 'ui/screens/splash_screen.dart'; // Splash orqali kiramiz
-// import 'services/notification_service.dart';
+import 'ui/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 1. Firebase + Crashlytics
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // Barcha Flutter xatolarini Crashlytics ga yuborish
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
   } catch (e) {
-    // print("Firebase ulanishda xato: $e");
+    // Firebase ulanmasa ham ilova ishlayveradi
   }
 
-  // Notification — crash bo'lmasin
+  // 2. Notification
   try {
     await NotificationService.init();
     await NotificationService.scheduleDailyNotification();
   } catch (e) {
-    // print("Notification xatosi: $e");
+    // Notification xatosi ilovani buzmasin
   }
 
+  // 3. Ma'lumotlarni yuklash
   final dictionaryProvider = DictionaryProvider();
   await dictionaryProvider.init();
   await dictionaryProvider.checkAndUpdateStreak();
@@ -76,7 +84,6 @@ class MyApp extends StatelessWidget {
       // Telefon sozlamasiga qarab rejimni tanlash
       themeMode: ThemeMode.system,
 
-      // Ilova SplashScreen bilan boshlanadi (Developed by Rayimbek deb chiqadi)
       home: const SplashScreen(),
     );
   }
