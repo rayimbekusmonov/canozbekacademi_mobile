@@ -64,29 +64,6 @@ class DictionaryProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateStreak() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastVisit = prefs.getString('last_visit');
-    final today = DateTime.now().toIso8601String().substring(0, 10); // "2026-01-28"
-
-    if (lastVisit == null) {
-      _streakCount = 1;
-    } else {
-      final lastVisitDate = DateTime.parse(lastVisit);
-      final difference = DateTime.now().difference(lastVisitDate).inDays;
-
-      if (difference == 1) {
-        _streakCount++; // Kecha ham kirgan edi
-      } else if (difference > 1) {
-        _streakCount = 1; // Bir kundan ko'p tashlab ketgan, streak uzildi
-      }
-    }
-
-    await prefs.setString('last_visit', today);
-    await prefs.setInt('streak_count', _streakCount);
-    notifyListeners();
-  }
-
   // --- STATISTIKA ---
   double get averageScore {
     if (_unitScores.isEmpty) return 0.0;

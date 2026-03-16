@@ -26,8 +26,8 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _startNewQuiz() {
-    widget.unit.words.shuffle();
-    _currentWords = widget.unit.words.take(20).toList();
+    List<WordModel> shuffled = List.from(widget.unit.words)..shuffle();
+    _currentWords = shuffled.take(20).toList();
     _generateOptions();
   }
 
@@ -43,9 +43,15 @@ class _QuizScreenState extends State<QuizScreen> {
   void _generateOptions() {
     final correctWord = _currentWords[_currentIndex];
     List<String> options = [correctWord.uz];
-    List<WordModel> allWords = List.from(widget.unit.words)..remove(correctWord);
-    allWords.shuffle();
-    options.addAll(allWords.take(3).map((w) => w.uz));
+
+    final provider = context.read<DictionaryProvider>();
+    List<WordModel> allWords = provider.allWords
+        .where((w) => w.uz != correctWord.uz)
+        .toList()
+      ..shuffle();
+
+    int needed = 3.clamp(0, allWords.length); // Agar 3 tadan kam bo'lsa
+    options.addAll(allWords.take(needed).map((w) => w.uz));
     options.shuffle();
 
     setState(() {

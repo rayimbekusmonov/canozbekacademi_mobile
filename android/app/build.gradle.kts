@@ -1,55 +1,67 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+// 1. key.properties faylini o'qish qismi
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 plugins {
     id("com.android.application")
-    // Firebase uchun
     id("com.google.gms.google-services")
     id("kotlin-android")
-    // Flutter plugin har doim oxirida bo'lishi kerak
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-    // Sening loyihang paketi
     namespace = "com.rayimbek.canozbekacademi"
-
-    // Android 14 (API 34) darajasida build qilamiz
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        // Desugaring - eski Androidlarda yangi Java funksiyalarini ishlatish uchun (Notification uchun shart)
+        // Desugaring - Notification barqarorligi uchun
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
         applicationId = "com.rayimbek.canozbekacademi"
-
-        // Android 5.0 dan past telefonlarni qo'llab-quvvatlamaymiz (Notification barqarorligi uchun)
         minSdk = flutter.minSdkVersion
-
-        // Target API 34 - bu ruxsatnomalar chiqishini ta'minlaydi
         targetSdk = 36
-
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        // Metodlar ko'payib ketsa xato bermasligi uchun
         multiDexEnabled = true
     }
 
-    buildTypes {
-        release {
-            // Hozircha debug kaliti bilan imzolaymiz
-            signingConfig = signingConfigs.getByName("debug")
+    // 2. Imzo sozlamalari (Kotlin sintaksisida)
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+            storePassword = keystoreProperties["storePassword"] as String?
+        }
+    }
 
-            // Release versiyada kodni siqish (ixtiyoriy)
-            isMinifyEnabled = false
-            isShrinkResources = false
+    buildTypes {
+        getByName("release") {
+            // Imzoni ulash
+            signingConfig = signingConfigs.getByName("release")
+
+            // Kodni optimallashtirish
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
@@ -59,6 +71,6 @@ flutter {
 }
 
 dependencies {
-    // Notification-lar va Timezone to'g'ri ishlashi uchun desugaring kutubxonasi
+    // Desugaring kutubxonasi
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

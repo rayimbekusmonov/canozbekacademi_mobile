@@ -20,13 +20,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToHome() async {
-    // DictionaryProvider-dagi init() metodini chaqiramiz
-    // Bu metod lug'at, favoritlar va sozlamalarni yuklaydi
-    await Provider.of<DictionaryProvider>(context, listen: false).init();
+    // init() allaqachon main.dart da chaqirilgan
+    // Shu sababli bu yerda faqat loading effekti uchun kutamiz
+    await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    // Yuklash tugagach, HomeScreen-ga o'tamiz
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => HomeScreen()),
