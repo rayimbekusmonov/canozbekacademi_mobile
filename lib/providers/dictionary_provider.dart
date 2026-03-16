@@ -110,19 +110,22 @@ class DictionaryProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _allUnits = await _service.loadDictionary();
+    try {
+      _allUnits = await _service.loadDictionary();
+      await loadFavorites();
+      await loadScores();
+      await loadFailedWords();
+      await loadSettings();
+      _setDailyWord();
 
-    // Barcha ma'lumotlarni yuklash
-    await loadFavorites();
-    await loadScores();
-    await loadFailedWords();
-    await loadSettings(); // BU QO'SHILDI
-
-    _setDailyWord();
-
-    // TTS boshlang'ich sozlamalari
-    await _flutterTts.setLanguage("tr-TR");
-    await _flutterTts.setSpeechRate(_speechRate);
+      // TTS boshlang'ich sozlamalari
+      await _flutterTts.setLanguage("tr-TR");
+      await _flutterTts.setSpeechRate(_speechRate);
+    } catch (e) {
+      print("Init xatosi: $e");
+      // Ilova crash bo'lmasin, bo'sh holatda davom etsin
+      _allUnits = [];
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -130,8 +133,12 @@ class DictionaryProvider with ChangeNotifier {
 
   // --- AUDIO ---
   Future<void> speak(String text) async {
-    if (text.isNotEmpty) {
-      await _flutterTts.speak(text);
+    try {
+      if (text.isNotEmpty) {
+        await _flutterTts.speak(text);
+      }
+    } catch (e) {
+      print("TTS xatosi: $e");
     }
   }
 
@@ -173,17 +180,15 @@ class DictionaryProvider with ChangeNotifier {
 
   // --- TEST NATIJALARI ---
   Future<void> saveScore(String unitKey, int score) async {
-    print("Statistika: $unitKey uchun $score ball saqlashga keldi."); // DEBUG
-
-    if (score > (_unitScores[unitKey] ?? 0)) {
-      _unitScores[unitKey] = score;
-      final prefs = await SharedPreferences.getInstance();
-
-      // JSON formatda saqlash
-      await prefs.setString('unit_scores', json.encode(_unitScores));
-
-      print("Statistika: Muvaffaqiyatli saqlandi! Hozirgi natijalar: $_unitScores"); // DEBUG
-      notifyListeners(); // UI darhol yangilanishi uchun
+    try {
+      if (score > (_unitScores[unitKey] ?? 0)) {
+        _unitScores[unitKey] = score;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('unit_scores', json.encode(_unitScores));
+        notifyListeners();
+      }
+    } catch (e) {
+      print("Score saqlashda xato: $e");
     }
   }
 

@@ -277,11 +277,16 @@ class HomeScreen extends StatelessWidget {
           const Divider(), // Ajratuvchi chiziq
           _drawerItem(
             context,
-            Icons.headset_mic_rounded, // Yordam ikonkani
+            Icons.headset_mic_rounded,
             "Murojaat va yordam",
-                () {
-              Navigator.pop(context); // Avval menyuni yopamiz
-              SupportService.connectToSupport(); // Keyin Telegramni ochamiz
+                () async {
+              Navigator.pop(context);
+              final success = await SupportService.connectToSupport();
+              if (!success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Telegram ilovasi topilmadi")),
+                );
+              }
             },
           ),
           // ---------------------------------------

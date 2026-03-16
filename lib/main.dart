@@ -10,35 +10,31 @@ import 'ui/screens/splash_screen.dart'; // Splash orqali kiramiz
 // import 'services/notification_service.dart';
 
 void main() async {
-  // 1. Flutter engine bilan bog'lanishni ta'minlash
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Firebase-ni ishga tushirish (agar firebase bo'lsa)
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print("Firebase muvaffaqiyatli ulandi!");
   } catch (e) {
     print("Firebase ulanishda xato: $e");
   }
 
-  // 3. Bildirishnoma xizmatini sozlash
-  // Bu yerda biz ham init qilamiz, ham ruxsat so'raymiz
-  await NotificationService.init();
+  // Notification — crash bo'lmasin
+  try {
+    await NotificationService.init();
+    await NotificationService.scheduleDailyNotification();
+  } catch (e) {
+    print("Notification xatosi: $e");
+  }
 
-  // Kunlik eslatmani rejalashtirish
-  await NotificationService.scheduleDailyNotification();
-
-  // 4. DictionaryProvider obyektini yaratish va ma'lumotlarni yuklash
   final dictionaryProvider = DictionaryProvider();
-  await dictionaryProvider.init(); // JSON ma'lumotlarni yuklash
-  await dictionaryProvider.checkAndUpdateStreak(); // Olovni (streak) tekshirish
+  await dictionaryProvider.init();
+  await dictionaryProvider.checkAndUpdateStreak();
 
   runApp(
     MultiProvider(
       providers: [
-        // Tayyor dictionaryProvider obyektini butun ilovaga tarqatamiz
         ChangeNotifierProvider.value(value: dictionaryProvider),
       ],
       child: const MyApp(),

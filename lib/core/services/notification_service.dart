@@ -54,28 +54,32 @@ class NotificationService {
   }
 
   static Future<void> scheduleDailyNotification() async {
-    await _notifications.zonedSchedule(
-      0,
-      'Canozbek Academy 🔥',
-      'Streak olovini o\'chirib qo\'ymang! Bugun yangi so\'zlar yodladingizmi?',
-      _nextInstanceOf20PM(),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'daily_channel_v2', // ID ni o'zgartirdik
-          'Kunlik Eslatmalar',
-          channelDescription: 'Canozbek Academy streak eslatmalari',
-          importance: Importance.max,
-          priority: Priority.high,
-          ticker: 'ticker',
-          icon: '@mipmap/ic_launcher', // Ikonkani aniq ko'rsatdik
+    try {
+      await _notifications.zonedSchedule(
+        0,
+        'Canozbek Academy 🔥',
+        'Streak olovini o\'chirib qo\'ymang! Bugun yangi so\'zlar yodladingizmi?',
+        _nextInstanceOf20PM(),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_channel_v2',
+            'Kunlik Eslatmalar',
+            channelDescription: 'Canozbek Academy streak eslatmalari',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker',
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      print("Notification rejalashtirish xatosi: $e");
+    }
   }
 
   static tz.TZDateTime _nextInstanceOf20PM() {
