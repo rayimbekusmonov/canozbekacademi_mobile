@@ -18,6 +18,7 @@ class _QuizScreenState extends State<QuizScreen> {
   String _selectedOption = "";
   late List<WordModel> _currentWords;
   List<String> _options = [];
+  List<WordModel> _wrongWords = [];
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _QuizScreenState extends State<QuizScreen> {
   void _startNewQuiz() {
     List<WordModel> shuffled = List.from(widget.unit.words)..shuffle();
     _currentWords = shuffled.take(20).toList();
+    _wrongWords = []; // Har safar yangi test boshlanganida tozalanadi
     _generateOptions();
   }
 
@@ -69,7 +71,7 @@ class _QuizScreenState extends State<QuizScreen> {
       if (option == _currentWords[_currentIndex].uz) {
         _score++;
       } else {
-        // PROVAYDERDAGI YANGI METODNI CHAQIRISH
+        _wrongWords.add(_currentWords[_currentIndex]); // Xato so'zni saqlaymiz
         context.read<DictionaryProvider>().addToMistakes(_currentWords[_currentIndex].tr);
       }
     });
@@ -90,39 +92,104 @@ class _QuizScreenState extends State<QuizScreen> {
     final int percent = ((_score / _currentWords.length) * 100).toInt();
     Color mainColor = percent >= 70 ? Colors.green : (percent >= 40 ? Colors.orange : Colors.red);
 
-    // --- STATISTIKANI SAQLASH QISMI (SHU YERDA MO'JIZA YUZ BERADI) ---
     final provider = context.read<DictionaryProvider>();
-    // Kalit so'zni shakllantiramiz (masalan: "A1_unit1")
     String unitKey = "${widget.unit.level}_unit${widget.unit.unitNo}";
-    // Providerdagi saveScore metodini chaqiramiz
     provider.saveScore(unitKey, _score);
-    // --------------------------------------------------------------
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
+      builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: Padding(
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(percent >= 70 ? Icons.emoji_events : Icons.psychology,
-                  size: 80, color: mainColor),
-              const SizedBox(height: 20),
+                  size: 60, color: mainColor),
+              const SizedBox(height: 12),
               Text("$percent%",
-                  style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: mainColor)),
+                  style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold, color: mainColor)),
               Text("$_score / ${_currentWords.length} to'g'ri",
-                  style: const TextStyle(fontSize: 18, color: Colors.grey)),
-              const SizedBox(height: 30),
+                  style: const TextStyle(fontSize: 16, color: Colors.grey)),
+
+              // XATO SO'ZLAR RO'YXATI
+              if (_wrongWords.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.close_rounded, size: 18, color: Colors.red.shade300),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Xato qilingan so'zlar (${_wrongWords.length})",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.red.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _wrongWords.length,
+                    itemBuilder: (context, index) {
+                      final word = _wrongWords[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.red.withOpacity(0.1)),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                word.tr,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                            ),
+                            const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                word.uz,
+                                style: TextStyle(color: Colors.blue.shade700, fontSize: 15),
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+
+              // 100% to'g'ri bo'lsa
+              if (_wrongWords.isEmpty) ...[
+                const SizedBox(height: 12),
+                const Text("🎉 Mukammal natija!", style: TextStyle(fontSize: 16)),
+              ],
+
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Dialogni yopish
-                        Navigator.pop(context); // QuizScreen-dan chiqish
+                        Navigator.pop(ctx);
+                        Navigator.pop(context);
                       },
                       child: const Text("Chiqish"),
                     ),
@@ -132,8 +199,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: mainColor),
                       onPressed: () {
-                        Navigator.pop(context); // Dialogni yopish
-                        _resetQuiz(); // Testni qayta boshlash
+                        Navigator.pop(ctx);
+                        _resetQuiz();
                       },
                       child: const Text("Qayta urinish", style: TextStyle(color: Colors.white)),
                     ),
