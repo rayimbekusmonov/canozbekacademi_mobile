@@ -115,7 +115,7 @@ class WordSearchDelegate extends SearchDelegate {
         final word = results[index];
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(15),
             boxShadow: [
               BoxShadow(

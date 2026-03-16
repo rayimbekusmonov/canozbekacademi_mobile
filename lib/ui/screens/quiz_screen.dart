@@ -151,7 +151,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final currentWord = _currentWords[_currentIndex];
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.blue.shade800,
         title: Text(widget.unit.unitName),
@@ -188,7 +188,10 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget _buildOption(String option) {
     bool isCorrect = option == _currentWords[_currentIndex].uz;
     bool isSelected = option == _selectedOption;
-    Color borderColor = _isAnswered ? (isCorrect ? Colors.green : (isSelected ? Colors.red : Colors.grey.shade200)) : Colors.grey.shade200;
+    final defaultBorder = Theme.of(context).dividerColor;
+    Color borderColor = _isAnswered
+        ? (isCorrect ? Colors.green : (isSelected ? Colors.red : defaultBorder))
+        : defaultBorder;
 
     return GestureDetector(
       onTap: () => _checkAnswer(option),
@@ -197,7 +200,12 @@ class _QuizScreenState extends State<QuizScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: _isAnswered && isCorrect ? Colors.green.shade50 : (_isAnswered && isSelected ? Colors.red.shade50 : Colors.white),
+          color: _isAnswered && isCorrect
+              ? Colors.green.shade50.withOpacity(0.2)
+              : (_isAnswered && isSelected
+              ? Colors.red.shade50.withOpacity(0.2)
+              : Theme.of(context).cardColor),
+
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: borderColor, width: 2),
         ),

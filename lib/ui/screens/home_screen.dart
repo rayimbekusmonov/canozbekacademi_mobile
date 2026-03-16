@@ -327,7 +327,8 @@ class HomeScreen extends StatelessWidget {
           Text("Bilim olishdan to'xtamang!",
               style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 12, fontStyle: FontStyle.italic)),
           const SizedBox(height: 4),
-          Text("© 2026 Canozbek Academy", style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
+          Text("© 2026 Canozbek Academy",
+              style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5), fontSize: 10)),
         ],
       ),
     );

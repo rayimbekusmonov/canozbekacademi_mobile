@@ -30,8 +30,8 @@ class WordCard extends StatelessWidget {
         back: _buildCard(
           title: word.uz,
           subtitle: "O'ZBEKCHA",
-          color: Colors.white,
-          textColor: Colors.blue.shade900,
+          color: Theme.of(context).cardColor,
+          textColor: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.blue.shade900,
           example: word.example,
           isFront: false,
           isFav: isFav,
