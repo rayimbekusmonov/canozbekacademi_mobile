@@ -1,9 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dictionary_provider.dart';
+import '../../core/services/notification_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  int _notifHour = 20;
+  int _notifMinute = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationTime();
+  }
+
+  Future<void> _loadNotificationTime() async {
+    final time = await NotificationService.getSavedTime();
+    setState(() {
+      _notifHour = time['hour']!;
+      _notifMinute = time['minute']!;
+    });
+  }
+
+  Future<void> _pickNotificationTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _notifHour, minute: _notifMinute),
+      helpText: "Eslatma vaqtini tanlang",
+      cancelText: "Bekor",
+      confirmText: "Saqlash",
+    );
+
+    if (picked != null) {
+      setState(() {
+        _notifHour = picked.hour;
+        _notifMinute = picked.minute;
+      });
+      await NotificationService.setNotificationTime(picked.hour, picked.minute);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Eslatma vaqti: ${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')} ga o'zgartirildi",
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +72,7 @@ class SettingsScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
+              // OVOZ SOZLAMALARI
               const Text(
                 "Ovoz sozlamalari",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -39,11 +91,33 @@ class SettingsScreen extends StatelessWidget {
                 onChanged: (value) => provider.setSpeechRate(value),
               ),
               TextButton.icon(
-                onPressed: () => provider.speak("Merhaba, nasılsınız?"), // Sinab ko'rish
+                onPressed: () => provider.speak("Merhaba, nasılsınız?"),
                 icon: const Icon(Icons.play_circle_fill),
                 label: const Text("Tezlikni sinab ko'rish"),
               ),
+
               const Divider(height: 40),
+
+              // BILDIRISHNOMA SOZLAMALARI
+              const Text(
+                "Bildirishnoma sozlamalari",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                leading: const Icon(Icons.notifications_active, color: Colors.orange),
+                title: const Text("Kunlik eslatma vaqti"),
+                subtitle: Text(
+                  "${_notifHour.toString().padLeft(2, '0')}:${_notifMinute.toString().padLeft(2, '0')}",
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                trailing: const Icon(Icons.edit, color: Colors.blue),
+                onTap: _pickNotificationTime,
+              ),
+
+              const Divider(height: 40),
+
+              // MA'LUMOTLAR BOSHQARUVI
               const Text(
                 "Ma'lumotlar boshqaruvi",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
