@@ -8,16 +8,25 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Provider-dan faqat favorit so'zlarni olamiz
-    final favoriteWords = context.watch<DictionaryProvider>().favoriteWords;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Mening lug'atim"),
+        title: const Text("Sevimli so'zlar",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
         centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.blueGrey.shade900, Colors.black]
+                  : [const Color(0xFFE91E63), const Color(0xFFC2185B)],
+            ),
+          ),
+        ),
       ),
-      // lib/ui/screens/favorites_screen.dart ichidagi body qismi:
-
       body: Consumer<DictionaryProvider>(
         builder: (context, provider, child) {
           final favorites = provider.favoriteWords;
@@ -27,37 +36,81 @@ class FavoritesScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.favorite_border_rounded,
-                    size: 100,
-                    color: Colors.grey.withValues(alpha: 0.3),
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.pink.withOpacity(0.1)
+                          : Colors.pink.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.favorite_border_rounded,
+                      size: 50,
+                      color: isDark ? Colors.pink.shade200 : Colors.pink.shade200,
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Text(
                     "Sevimli so'zlar hali yo'q",
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white70 : Colors.grey.shade700,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     "So'zlarni favoritga qo'shish uchun\nyurakcha tugmasini bosing",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.grey.shade500,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          return ListView.builder(
-            itemCount: favorites.length,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            itemBuilder: (context, index) {
-              return WordCard(word: favorites[index]);
-            },
+          return Column(
+            children: [
+              // Info banner
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.pink.withOpacity(0.1) : Colors.pink.shade50,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.favorite_rounded,
+                        size: 18, color: Colors.pink.shade300),
+                    const SizedBox(width: 10),
+                    Text(
+                      "${favorites.length} ta sevimli so'z",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.pink.shade200 : Colors.pink.shade700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Expanded(
+                child: ListView.builder(
+                  itemCount: favorites.length,
+                  padding: const EdgeInsets.only(bottom: 20),
+                  itemBuilder: (context, index) {
+                    return WordCard(word: favorites[index]);
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

@@ -13,34 +13,68 @@ class FlashcardsScreen extends StatefulWidget {
 }
 
 class _FlashcardsScreenState extends State<FlashcardsScreen> {
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(viewportFraction: 0.9);
   int _currentIndex = 0;
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.blue.shade800,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.blueGrey.shade900, Colors.black]
+                  : [const Color(0xFF0D47A1), const Color(0xFF1E88E5)],
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
-          // Progress bar - foydalanuvchi qayerdaligini ko'rib turadi
-          LinearProgressIndicator(
-            value: (_currentIndex + 1) / widget.words.length,
-            backgroundColor: Colors.blue.shade100,
-            color: Colors.orange,
-            minHeight: 8,
+          // Progress
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              children: [
+                Text(
+                  "${_currentIndex + 1} / ${widget.words.length}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: isDark ? Colors.white54 : Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: (_currentIndex + 1) / widget.words.length,
+                      minHeight: 6,
+                      backgroundColor: isDark ? Colors.white12 : Colors.blue.shade50,
+                      valueColor: const AlwaysStoppedAnimation(Color(0xFFFF9800)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          const Spacer(),
-
-          // Kartochkalar (Swipe orqali o'tadigan qism)
-          SizedBox(
-            height: 400, // WordCard bo'yi
+          // Kartochkalar
+          Expanded(
             child: PageView.builder(
               controller: _pageController,
               itemCount: widget.words.length,
@@ -49,7 +83,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
               },
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 20),
                   child: Center(
                     child: WordCard(word: widget.words[index]),
                   ),
@@ -58,35 +92,54 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
             ),
           ),
 
-          const Spacer(),
-
-          // Pastki boshqaruv tugmalari
+          // Boshqaruv tugmalari
           Padding(
-            padding: const EdgeInsets.all(30.0),
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 40),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildNavButton(
-                  icon: Icons.arrow_back_ios,
-                  onTap: _currentIndex > 0 ? () {
+                  icon: Icons.arrow_back_ios_rounded,
+                  isActive: _currentIndex > 0,
+                  onTap: _currentIndex > 0
+                      ? () {
                     _pageController.previousPage(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
                     );
-                  } : null,
+                  }
+                      : null,
+                  isDark: isDark,
                 ),
-                Text(
-                  "${_currentIndex + 1} / ${widget.words.length}",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                // Dots indicator
+                Row(
+                  children: List.generate(
+                    widget.words.length > 10 ? 0 : widget.words.length,
+                        (index) => Container(
+                      width: index == _currentIndex ? 24 : 8,
+                      height: 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      decoration: BoxDecoration(
+                        color: index == _currentIndex
+                            ? const Color(0xFF0D47A1)
+                            : (isDark ? Colors.white12 : Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
                 ),
                 _buildNavButton(
-                  icon: Icons.arrow_forward_ios,
-                  onTap: _currentIndex < widget.words.length - 1 ? () {
+                  icon: Icons.arrow_forward_ios_rounded,
+                  isActive: _currentIndex < widget.words.length - 1,
+                  onTap: _currentIndex < widget.words.length - 1
+                      ? () {
                     _pageController.nextPage(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
                     );
-                  } : null,
+                  }
+                      : null,
+                  isDark: isDark,
                 ),
               ],
             ),
@@ -96,13 +149,28 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
     );
   }
 
-  Widget _buildNavButton({required IconData icon, VoidCallback? onTap}) {
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: onTap != null ? Colors.blue.shade800 : Colors.grey.shade300,
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 20),
-        onPressed: onTap,
+  Widget _buildNavButton({
+    required IconData icon,
+    required bool isActive,
+    required bool isDark,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: isActive
+              ? const Color(0xFF0D47A1)
+              : (isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Icon(
+          icon,
+          color: isActive ? Colors.white : Colors.grey,
+          size: 20,
+        ),
       ),
     );
   }
