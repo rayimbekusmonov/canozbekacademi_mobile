@@ -17,7 +17,6 @@ class DictionaryService {
           Map<String, dynamic> jsonData = jsonDecode(jsonString);
           allLoadedUnits.add(UnitModel.fromJson(jsonData));
         } catch (e) {
-          // Fayl bo'lmasa, shunchaki keyingisiga o'tamiz
           continue;
         }
       }

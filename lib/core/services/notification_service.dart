@@ -36,10 +36,9 @@ class NotificationService {
     final android = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
-    if (android != null) {
-      final result = await android.requestNotificationsPermission();
-      print("Notification ruxsati natijasi: $result");
-    }
+    // if (android != null) {
+    //   final result = await android.requestNotificationsPermission();
+    // }
 
     final ios = _notifications.resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>();

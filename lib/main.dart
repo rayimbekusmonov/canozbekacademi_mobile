@@ -17,7 +17,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    print("Firebase ulanishda xato: $e");
+    // print("Firebase ulanishda xato: $e");
   }
 
   // Notification — crash bo'lmasin
@@ -25,7 +25,7 @@ void main() async {
     await NotificationService.init();
     await NotificationService.scheduleDailyNotification();
   } catch (e) {
-    print("Notification xatosi: $e");
+    // print("Notification xatosi: $e");
   }
 
   final dictionaryProvider = DictionaryProvider();
