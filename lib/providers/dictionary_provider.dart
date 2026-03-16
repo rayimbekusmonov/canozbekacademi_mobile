@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/models/word_model.dart';
 import '../core/services/dictionary_service.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class DictionaryProvider with ChangeNotifier {
@@ -153,24 +152,6 @@ class DictionaryProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _failedWordTrs = prefs.getStringList('failed_words') ?? [];
     notifyListeners();
-  }
-
-  Future<void> addFailedWord(String trWord) async {
-    if (!_failedWordTrs.contains(trWord)) {
-      _failedWordTrs.add(trWord);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('failed_words', _failedWordTrs);
-      notifyListeners();
-    }
-  }
-
-  Future<void> removeFailedWord(String trWord) async {
-    if (_failedWordTrs.contains(trWord)) {
-      _failedWordTrs.remove(trWord);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('failed_words', _failedWordTrs);
-      notifyListeners();
-    }
   }
 
   List<WordModel> get failedWords {
